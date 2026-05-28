@@ -25,9 +25,11 @@
       --blue: #3b82f6;
       --blue-dim: #1d4ed8;
       --amber: #f59e0b;
+      --green: #22c55e;
       --text-primary: #e8eaf0;
       --text-muted: #6b7280;
       --danger: #ef4444;
+      --tab-h: 64px;
     }
 
     * { box-sizing: border-box; }
@@ -38,15 +40,55 @@
       font-family: 'SF Pro Display', 'Hiragino Sans', 'Meiryo', sans-serif;
       min-height: 100vh;
       padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
+      padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom));
     }
 
+    /* ── Tab ── */
+    .tab-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: calc(var(--tab-h) + env(safe-area-inset-bottom));
+      padding-bottom: env(safe-area-inset-bottom);
+      background: rgba(17,20,26,0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 100;
+    }
+
+    .tab-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
+      transition: color 0.15s;
+      border: none;
+      background: none;
+      padding: 0;
+    }
+
+    .tab-item.active { color: var(--blue); }
+    .tab-item svg { width: 22px; height: 22px; }
+
+    /* ── Page ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── Card ── */
     .card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 16px;
     }
 
+    /* ── Stats ── */
     .stat-value {
       font-size: 2.8rem;
       font-weight: 700;
@@ -55,58 +97,65 @@
       color: var(--blue);
       text-shadow: 0 0 20px rgba(59,130,246,0.4);
     }
+    .stat-unit { font-size: 1rem; color: var(--text-muted); }
+    .stat-label { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
+    .amber-val { color: var(--amber); text-shadow: 0 0 20px rgba(245,158,11,0.4); }
 
-    .stat-unit {
-      font-size: 1rem;
-      color: var(--text-muted);
-      font-weight: 400;
-    }
-
-    .stat-label {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    .amber-val {
-      color: var(--amber);
-      text-shadow: 0 0 20px rgba(245,158,11,0.4);
-    }
-
+    /* ── Input ── */
     input[type="text"],
     input[type="number"],
-    input[type="date"] {
+    input[type="date"],
+    select {
       background: var(--bg-input);
       border: 1.5px solid var(--border);
       color: var(--text-primary);
       border-radius: 12px;
       width: 100%;
       padding: 14px 16px;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       outline: none;
       transition: border-color 0.2s;
       -webkit-appearance: none;
+      appearance: none;
     }
-
-    input:focus {
+    input:focus, select:focus {
       border-color: var(--blue);
       box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
     }
-
-    input[type="date"]::-webkit-calendar-picker-indicator {
-      filter: invert(0.5);
-    }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); }
 
     label {
       display: block;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
       letter-spacing: 0.08em;
       margin-bottom: 6px;
       text-transform: uppercase;
     }
 
+    /* ── Toggle ── */
+    .toggle-wrap { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .toggle { position: relative; width: 44px; height: 26px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0;
+      background: var(--border);
+      border-radius: 26px;
+      transition: 0.2s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      left: 3px; top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+    .toggle input:checked + .toggle-slider { background: var(--blue); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+    /* ── Buttons ── */
     .btn-primary {
       background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dim) 100%);
       color: #fff;
@@ -121,11 +170,21 @@
       transition: opacity 0.15s, transform 0.1s;
       box-shadow: 0 4px 20px rgba(59,130,246,0.3);
     }
+    .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
 
-    .btn-primary:active {
-      opacity: 0.85;
-      transform: scale(0.98);
+    .btn-secondary {
+      background: var(--bg-input);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      width: 100%;
+      cursor: pointer;
+      transition: border-color 0.15s;
     }
+    .btn-secondary:hover { border-color: var(--blue); }
 
     .btn-delete {
       background: none;
@@ -137,13 +196,9 @@
       cursor: pointer;
       transition: all 0.15s;
     }
+    .btn-delete:hover { background: rgba(239,68,68,0.15); border-color: var(--danger); color: var(--danger); }
 
-    .btn-delete:hover {
-      background: rgba(239,68,68,0.15);
-      border-color: var(--danger);
-      color: var(--danger);
-    }
-
+    /* ── History ── */
     .history-card {
       background: var(--bg-input);
       border: 1px solid var(--border);
@@ -151,31 +206,21 @@
       padding: 14px 16px;
       transition: border-color 0.2s;
     }
+    .history-card:hover { border-color: #3a4060; }
 
-    .history-card:hover {
-      border-color: #3a4060;
-    }
-
-    .divider {
-      width: 1px;
-      background: var(--border);
-      align-self: stretch;
-    }
+    /* ── Misc ── */
+    .divider { width: 1px; background: var(--border); align-self: stretch; }
 
     .badge {
       display: inline-block;
-      background: rgba(59,130,246,0.15);
-      color: var(--blue);
       border-radius: 6px;
       padding: 2px 8px;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 600;
     }
-
-    .first-badge {
-      background: rgba(245,158,11,0.15);
-      color: var(--amber);
-    }
+    .badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-amber { background: rgba(245,158,11,0.15); color: var(--amber); }
+    .badge-gray { background: rgba(107,114,128,0.2); color: var(--text-muted); }
 
     .section-title {
       font-size: 0.72rem;
@@ -193,6 +238,23 @@
       padding: 14px 16px;
     }
 
+    /* ── Tank bar ── */
+    .tank-bar-wrap { height: 6px; background: var(--bg-input); border-radius: 4px; overflow: hidden; }
+    .tank-bar { height: 100%; border-radius: 4px; transition: width 0.4s; background: linear-gradient(90deg, var(--blue), var(--green)); }
+
+    /* ── Graph ── */
+    #graphCanvas { width: 100%; border-radius: 12px; display: block; }
+
+    /* ── Settings row ── */
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .setting-row:last-child { border-bottom: none; }
+
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -200,23 +262,25 @@
 </head>
 <body>
 
+<!-- ═══════════════ HOME ═══════════════ -->
+<div id="pageHome" class="page active">
 <div class="max-w-md mx-auto px-4 py-6">
 
   <!-- ヘッダー -->
   <div class="flex items-center justify-between mb-6">
     <div>
       <h1 class="text-xl font-bold tracking-tight">⛽ 燃費トラッカー</h1>
-      <p class="text-xs mt-0.5" style="color:var(--text-muted)">MY FUEL LOG</p>
+      <p class="text-xs mt-0.5" id="headerCarName" style="color:var(--text-muted)">MY FUEL LOG</p>
     </div>
-    <div id="totalCount" class="text-right">
-      <div class="text-2xl font-bold" style="color:var(--blue)">0</div>
+    <div class="text-right">
+      <div class="text-2xl font-bold" id="totalCount" style="color:var(--blue)">0</div>
       <div class="text-xs" style="color:var(--text-muted)">給油回数</div>
     </div>
   </div>
 
   <!-- ダッシュボード -->
   <div id="dashboard" class="card p-5 mb-5" style="display:none">
-    <div class="section-title mb-4">前回給油との比較</div>
+    <div class="section-title mb-4">最新の給油結果</div>
     <div class="flex gap-4 justify-around">
       <div class="text-center flex-1">
         <div class="stat-label mb-2">実燃費</div>
@@ -235,6 +299,14 @@
         <div class="stat-value" id="dashPrice" style="font-size:2rem">--</div>
         <div class="stat-unit">円/L</div>
       </div>
+    </div>
+    <!-- タンク残量バー -->
+    <div id="tankBarWrap" style="display:none" class="mt-4">
+      <div class="flex justify-between text-xs mb-1" style="color:var(--text-muted)">
+        <span>タンク使用率</span>
+        <span id="tankPct"></span>
+      </div>
+      <div class="tank-bar-wrap"><div class="tank-bar" id="tankBar" style="width:0%"></div></div>
     </div>
   </div>
 
@@ -263,14 +335,23 @@
       </div>
       <div class="flex gap-3">
         <div class="flex-1">
-          <label>給油量</label>
+          <label>給油量 (L)</label>
           <input type="number" id="inputLiter" placeholder="例：35.5" inputmode="decimal" step="0.01" />
         </div>
         <div class="flex-1">
-          <label>合計金額</label>
+          <label>合計金額 (円)</label>
           <input type="number" id="inputAmount" placeholder="例：5800" inputmode="numeric" />
         </div>
       </div>
+      <!-- 満タンフラグ -->
+      <label class="toggle-wrap" style="text-transform:none;font-size:0.9rem;color:var(--text-primary);margin-bottom:0">
+        <span class="toggle">
+          <input type="checkbox" id="inputFullTank" checked />
+          <span class="toggle-slider"></span>
+        </span>
+        満タン給油
+        <span class="text-xs ml-1" style="color:var(--text-muted)">(OFFで部分給油)</span>
+      </label>
       <button class="btn-primary" onclick="addRecord()">記録する</button>
     </div>
   </div>
@@ -287,29 +368,165 @@
   </div>
 
 </div>
+</div>
+
+<!-- ═══════════════ GRAPH ═══════════════ -->
+<div id="pageGraph" class="page">
+<div class="max-w-md mx-auto px-4 py-6">
+
+  <div class="mb-6">
+    <h2 class="text-xl font-bold tracking-tight">📊 燃費グラフ</h2>
+    <p class="text-xs mt-0.5" style="color:var(--text-muted)">FUEL EFFICIENCY TREND</p>
+  </div>
+
+  <div class="card p-4 mb-5">
+    <div class="section-title mb-4">実燃費の推移 (km/L)</div>
+    <canvas id="graphCanvas" height="200"></canvas>
+    <p id="graphEmpty" class="text-center text-sm py-6" style="color:var(--text-muted);display:none">データが2件以上あるとグラフが表示されます</p>
+  </div>
+
+  <!-- 統計サマリー -->
+  <div class="card p-5 mb-5" id="statsSummary" style="display:none">
+    <div class="section-title mb-4">累計統計</div>
+    <div class="grid grid-cols-2 gap-3">
+      <div class="history-card text-center">
+        <div class="stat-label mb-1">平均燃費</div>
+        <div class="text-2xl font-bold" style="color:var(--blue)" id="avgFuel">--</div>
+        <div class="text-xs" style="color:var(--text-muted)">km/L</div>
+      </div>
+      <div class="history-card text-center">
+        <div class="stat-label mb-1">平均単価</div>
+        <div class="text-2xl font-bold" style="color:var(--amber)" id="avgPrice">--</div>
+        <div class="text-xs" style="color:var(--text-muted)">円/L</div>
+      </div>
+      <div class="history-card text-center">
+        <div class="stat-label mb-1">総走行距離</div>
+        <div class="text-2xl font-bold" style="color:var(--green)" id="totalKm">--</div>
+        <div class="text-xs" style="color:var(--text-muted)">km</div>
+      </div>
+      <div class="history-card text-center">
+        <div class="stat-label mb-1">総給油コスト</div>
+        <div class="text-2xl font-bold" style="color:var(--text-primary)" id="totalCost">--</div>
+        <div class="text-xs" style="color:var(--text-muted)">円</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ═══════════════ SETTINGS ═══════════════ -->
+<div id="pageSettings" class="page">
+<div class="max-w-md mx-auto px-4 py-6">
+
+  <div class="mb-6">
+    <h2 class="text-xl font-bold tracking-tight">⚙️ 設定</h2>
+    <p class="text-xs mt-0.5" style="color:var(--text-muted)">SETTINGS</p>
+  </div>
+
+  <!-- 車両設定 -->
+  <div class="card mb-5">
+    <div class="p-4 pb-2"><div class="section-title">車両情報</div></div>
+    <div class="p-4 pt-2 space-y-4">
+      <div>
+        <label>車種・愛車名</label>
+        <input type="text" id="setCarName" placeholder="例：ヤリス、N-BOX" />
+      </div>
+      <div>
+        <label>タンク容量 (L) ※任意</label>
+        <input type="number" id="setTankSize" placeholder="例：50" inputmode="decimal" step="0.1" />
+        <p class="text-xs mt-1" style="color:var(--text-muted)">設定するとタンク使用率バーが表示されます</p>
+      </div>
+      <button class="btn-primary" onclick="saveSettings()">保存する</button>
+      <div id="settingsSaved" class="text-center text-sm" style="color:var(--green);display:none">✓ 保存しました</div>
+    </div>
+  </div>
+
+  <!-- データ管理 -->
+  <div class="card mb-5">
+    <div class="p-4 pb-2"><div class="section-title">データ管理</div></div>
+    <div class="p-4 pt-3 space-y-3">
+      <button class="btn-secondary" onclick="exportCSV()">
+        📥 CSVエクスポート
+      </button>
+      <p class="text-xs" style="color:var(--text-muted)">全給油データをCSVファイルとしてダウンロードします</p>
+      <div style="border-top:1px solid var(--border);padding-top:12px">
+        <button class="btn-secondary" style="color:var(--danger);border-color:#3a2020" onclick="clearAllData()">
+          🗑️ 全データ削除
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- アプリ情報 -->
+  <div class="card">
+    <div class="setting-row">
+      <span class="text-sm" style="color:var(--text-muted)">バージョン</span>
+      <span class="text-sm font-mono">2.0.0</span>
+    </div>
+    <div class="setting-row">
+      <span class="text-sm" style="color:var(--text-muted)">データ保存場所</span>
+      <span class="text-sm">LocalStorage</span>
+    </div>
+    <div class="setting-row">
+      <span class="text-sm" style="color:var(--text-muted)">オフライン対応</span>
+      <span class="text-sm" style="color:var(--green)">✓ 対応済み</span>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ═══════════════ TAB BAR ═══════════════ -->
+<nav class="tab-bar">
+  <button class="tab-item active" id="tabHome" onclick="switchTab('Home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+    ホーム
+  </button>
+  <button class="tab-item" id="tabGraph" onclick="switchTab('Graph')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+    </svg>
+    グラフ
+  </button>
+  <button class="tab-item" id="tabSettings" onclick="switchTab('Settings')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+    設定
+  </button>
+</nav>
 
 <script>
-const STORAGE_KEY = 'fuelTracker_v1';
+// ═══════════════ Storage ═══════════════
+const RECORDS_KEY  = 'fuelTracker_v1';
+const SETTINGS_KEY = 'fuelTracker_settings';
 
-function load() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+function loadRecords() {
+  try { return JSON.parse(localStorage.getItem(RECORDS_KEY)) || []; }
   catch { return []; }
 }
+function saveRecords(r) { localStorage.setItem(RECORDS_KEY, JSON.stringify(r)); }
 
-function save(records) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+function loadSettings() {
+  try { return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; }
+  catch { return {}; }
 }
+function saveSettingsData(s) { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
 
-function formatDate(dateStr) {
-  const [y, m, d] = dateStr.split('-');
-  return `${y}/${m}/${d}`;
-}
-
+// ═══════════════ Helpers ═══════════════
 function today() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
-
+function formatDate(s) {
+  const [y,m,d] = s.split('-');
+  return `${y}/${m}/${d}`;
+}
 function showError(msg) {
   const el = document.getElementById('errorMsg');
   el.textContent = msg;
@@ -317,71 +534,318 @@ function showError(msg) {
   setTimeout(() => { el.style.display = 'none'; }, 3000);
 }
 
-function addRecord() {
-  const date   = document.getElementById('inputDate').value;
-  const odo    = parseFloat(document.getElementById('inputOdo').value);
-  const liter  = parseFloat(document.getElementById('inputLiter').value);
-  const amount = parseFloat(document.getElementById('inputAmount').value);
+// ═══════════════ Fuel calculation (non-full tank support) ═══════════════
+//
+// 満タン法：前の「満タン」記録から今回の「満タン」記録までの
+// 走行距離 / その間の総給油量 で実燃費を計算する。
+// 間に部分給油がある場合はそのリッターも合算する。
+//
+function calcFuelEfficiency(records, targetIdx) {
+  const r = records[targetIdx];
+  if (!r.fullTank) return null; // 部分給油は燃費を計算しない
 
-  if (!date)         return showError('給油日を入力してください');
-  if (isNaN(odo))    return showError('総走行距離を入力してください');
-  if (isNaN(liter) || liter <= 0) return showError('給油量を入力してください');
-  if (isNaN(amount) || amount <= 0) return showError('合計金額を入力してください');
+  // 直前の満タン給油を探す
+  let prevFullIdx = -1;
+  for (let i = targetIdx - 1; i >= 0; i--) {
+    if (records[i].fullTank) { prevFullIdx = i; break; }
+  }
+  if (prevFullIdx === -1) return null; // 基準点がない
 
-  const records = load();
-
-  if (records.length > 0) {
-    const last = records[records.length - 1];
-    if (odo <= last.odo) {
-      return showError(`総走行距離は前回(${last.odo.toLocaleString()}km)より大きい値を入力してください`);
-    }
+  // 前の満タンから今回までの全ての給油量を合算
+  let totalLiter = 0;
+  for (let i = prevFullIdx + 1; i <= targetIdx; i++) {
+    totalLiter += records[i].liter;
   }
 
-  const record = { date, odo, liter, amount, id: Date.now() };
-  records.push(record);
-  save(records);
+  const trip = r.odo - records[prevFullIdx].odo;
+  if (trip <= 0 || totalLiter <= 0) return null;
+  return { fuel: trip / totalLiter, trip };
+}
 
-  document.getElementById('inputOdo').value = '';
-  document.getElementById('inputLiter').value = '';
+// ═══════════════ Add Record ═══════════════
+function addRecord() {
+  const date     = document.getElementById('inputDate').value;
+  const odo      = parseFloat(document.getElementById('inputOdo').value);
+  const liter    = parseFloat(document.getElementById('inputLiter').value);
+  const amount   = parseFloat(document.getElementById('inputAmount').value);
+  const fullTank = document.getElementById('inputFullTank').checked;
+
+  if (!date)                        return showError('給油日を入力してください');
+  if (isNaN(odo))                   return showError('総走行距離を入力してください');
+  if (isNaN(liter) || liter <= 0)   return showError('給油量を入力してください');
+  if (isNaN(amount) || amount <= 0) return showError('合計金額を入力してください');
+
+  const records = loadRecords();
+  if (records.length > 0 && odo <= records[records.length - 1].odo) {
+    return showError(`総走行距離は前回(${records[records.length-1].odo.toLocaleString()}km)より大きい値を入力してください`);
+  }
+
+  records.push({ date, odo, liter, amount, fullTank, id: Date.now() });
+  saveRecords(records);
+
+  document.getElementById('inputOdo').value    = '';
+  document.getElementById('inputLiter').value  = '';
   document.getElementById('inputAmount').value = '';
-  document.getElementById('inputDate').value = today();
+  document.getElementById('inputDate').value   = today();
+  document.getElementById('inputFullTank').checked = true;
 
   render();
 }
 
+// ═══════════════ Delete ═══════════════
 function deleteRecord(id) {
   if (!confirm('このデータを削除しますか？')) return;
-  const records = load().filter(r => r.id !== id);
-  save(records);
+  saveRecords(loadRecords().filter(r => r.id !== id));
   render();
 }
 
-function render() {
-  const records = load();
-  document.getElementById('totalCount').querySelector('div').textContent = records.length;
+// ═══════════════ Settings ═══════════════
+function saveSettings() {
+  const s = {
+    carName:  document.getElementById('setCarName').value.trim(),
+    tankSize: parseFloat(document.getElementById('setTankSize').value) || 0
+  };
+  saveSettingsData(s);
+  const msg = document.getElementById('settingsSaved');
+  msg.style.display = 'block';
+  setTimeout(() => { msg.style.display = 'none'; }, 2000);
+  render();
+}
 
-  const dashboard = document.getElementById('dashboard');
+function loadSettingsToForm() {
+  const s = loadSettings();
+  document.getElementById('setCarName').value  = s.carName  || '';
+  document.getElementById('setTankSize').value = s.tankSize || '';
+}
+
+// ═══════════════ CSV Export ═══════════════
+function exportCSV() {
+  const records = loadRecords();
+  if (records.length === 0) { alert('エクスポートするデータがありません'); return; }
+
+  const header = ['日付', 'Odo(km)', '給油量(L)', '金額(円)', '単価(円/L)', '走行距離(km)', '実燃費(km/L)', '満タン'];
+  const rows = records.map((r, i) => {
+    const calc   = calcFuelEfficiency(records, i);
+    const price  = Math.round(r.amount / r.liter);
+    return [
+      r.date,
+      r.odo,
+      r.liter,
+      r.amount,
+      price,
+      calc ? calc.trip : '',
+      calc ? calc.fuel.toFixed(2) : '',
+      r.fullTank ? '○' : '△部分給油'
+    ].join(',');
+  });
+
+  const csv  = '﻿' + [header.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `fuel_log_${today()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════ Clear All ═══════════════
+function clearAllData() {
+  if (!confirm('全データを削除します。この操作は取り消せません。\n本当に削除しますか？')) return;
+  localStorage.removeItem(RECORDS_KEY);
+  render();
+}
+
+// ═══════════════ Graph ═══════════════
+function drawGraph() {
+  const records = loadRecords();
+  const canvas  = document.getElementById('graphCanvas');
+  const empty   = document.getElementById('graphEmpty');
+
+  // 燃費が計算できるデータ点のみ
+  const points = records
+    .map((r, i) => {
+      const c = calcFuelEfficiency(records, i);
+      return c ? { date: r.date, fuel: parseFloat(c.fuel.toFixed(2)) } : null;
+    })
+    .filter(Boolean);
+
+  if (points.length < 1) {
+    canvas.style.display = 'none';
+    empty.style.display  = 'block';
+    return;
+  }
+
+  canvas.style.display = 'block';
+  empty.style.display  = 'none';
+
+  const dpr  = window.devicePixelRatio || 1;
+  const W    = canvas.parentElement.clientWidth - 32;
+  const H    = 200;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const pad = { top: 20, right: 20, bottom: 36, left: 44 };
+  const gW  = W - pad.left - pad.right;
+  const gH  = H - pad.top  - pad.bottom;
+
+  // colors
+  const blue  = '#3b82f6';
+  const amber = '#f59e0b';
+  const grid  = '#2a3044';
+  const muted = '#6b7280';
+
+  // scale
+  const fuels  = points.map(p => p.fuel);
+  const minF   = Math.max(0, Math.min(...fuels) - 1);
+  const maxF   = Math.max(...fuels) + 1;
+  const scaleX = i => pad.left + (i / (points.length - 1 || 1)) * gW;
+  const scaleY = v => pad.top  + gH - ((v - minF) / (maxF - minF)) * gH;
+
+  // grid lines
+  ctx.strokeStyle = grid;
+  ctx.lineWidth   = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + (gH / 4) * i;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + gW, y); ctx.stroke();
+    const val = (maxF - ((maxF - minF) / 4) * i).toFixed(1);
+    ctx.fillStyle  = muted;
+    ctx.font       = `${10 * dpr / dpr}px sans-serif`;
+    ctx.textAlign  = 'right';
+    ctx.fillText(val, pad.left - 6, y + 4);
+  }
+
+  if (points.length === 1) {
+    // 1点だけの場合はドットのみ
+    const x = scaleX(0), y = scaleY(points[0].fuel);
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = blue;
+    ctx.fill();
+    return;
+  }
+
+  // gradient fill
+  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + gH);
+  grad.addColorStop(0,   'rgba(59,130,246,0.3)');
+  grad.addColorStop(1,   'rgba(59,130,246,0)');
+  ctx.beginPath();
+  ctx.moveTo(scaleX(0), pad.top + gH);
+  points.forEach((p, i) => ctx.lineTo(scaleX(i), scaleY(p.fuel)));
+  ctx.lineTo(scaleX(points.length - 1), pad.top + gH);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // line
+  ctx.beginPath();
+  ctx.strokeStyle = blue;
+  ctx.lineWidth   = 2.5;
+  ctx.lineJoin    = 'round';
+  points.forEach((p, i) => i === 0 ? ctx.moveTo(scaleX(i), scaleY(p.fuel)) : ctx.lineTo(scaleX(i), scaleY(p.fuel)));
+  ctx.stroke();
+
+  // dots + labels
+  points.forEach((p, i) => {
+    const x = scaleX(i), y = scaleY(p.fuel);
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fillStyle   = '#11141a';
+    ctx.fill();
+    ctx.strokeStyle = blue;
+    ctx.lineWidth   = 2;
+    ctx.stroke();
+
+    ctx.fillStyle  = '#e8eaf0';
+    ctx.font       = `bold ${10}px sans-serif`;
+    ctx.textAlign  = 'center';
+    ctx.fillText(p.fuel.toFixed(1), x, y - 10);
+
+    // x axis label (short date)
+    const label = p.date.slice(5).replace('-', '/');
+    ctx.fillStyle = muted;
+    ctx.font      = `${9}px sans-serif`;
+    ctx.fillText(label, x, H - pad.bottom + 16);
+  });
+}
+
+// ═══════════════ Stats Summary ═══════════════
+function renderStats() {
+  const records = loadRecords();
+  const summary = document.getElementById('statsSummary');
+  if (records.length < 2) { summary.style.display = 'none'; return; }
+  summary.style.display = 'block';
+
+  const fuelPoints = records
+    .map((r, i) => calcFuelEfficiency(records, i))
+    .filter(Boolean);
+
+  const avgFuel  = fuelPoints.length ? (fuelPoints.reduce((s,p) => s + p.fuel, 0) / fuelPoints.length).toFixed(1) : '--';
+  const avgPrice = Math.round(records.reduce((s,r) => s + r.amount / r.liter, 0) / records.length);
+  const firstRec = records[0], lastRec = records[records.length-1];
+  const totalKm  = lastRec.odo - firstRec.odo;
+  const totalCost = records.slice(1).reduce((s,r) => s + r.amount, 0);
+
+  document.getElementById('avgFuel').textContent  = avgFuel;
+  document.getElementById('avgPrice').textContent = avgPrice.toLocaleString();
+  document.getElementById('totalKm').textContent  = totalKm.toLocaleString();
+  document.getElementById('totalCost').textContent = '¥' + totalCost.toLocaleString();
+}
+
+// ═══════════════ Render Home ═══════════════
+function render() {
+  const records  = loadRecords();
+  const settings = loadSettings();
+
+  // header car name
+  const headerCar = document.getElementById('headerCarName');
+  headerCar.textContent = settings.carName ? settings.carName.toUpperCase() : 'MY FUEL LOG';
+
+  document.getElementById('totalCount').textContent = records.length;
+
+  const dashboard   = document.getElementById('dashboard');
   const firstNotice = document.getElementById('firstNotice');
 
+  // find latest fuel efficiency result
+  let latestCalc = null;
+  for (let i = records.length - 1; i >= 0; i--) {
+    const c = calcFuelEfficiency(records, i);
+    if (c) { latestCalc = { ...c, record: records[i] }; break; }
+  }
+
   if (records.length === 0) {
-    dashboard.style.display = 'none';
+    dashboard.style.display   = 'none';
     firstNotice.style.display = 'none';
-  } else if (records.length === 1) {
-    dashboard.style.display = 'none';
+  } else if (!latestCalc) {
+    dashboard.style.display   = 'none';
     firstNotice.style.display = 'block';
   } else {
     firstNotice.style.display = 'none';
-    dashboard.style.display = 'block';
-    const last = records[records.length - 1];
-    const prev = records[records.length - 2];
-    const trip = last.odo - prev.odo;
-    const fuel = (trip / last.liter).toFixed(1);
-    const price = Math.round(last.amount / last.liter);
-    document.getElementById('dashFuel').textContent = fuel;
-    document.getElementById('dashTrip').textContent = trip.toLocaleString();
+    dashboard.style.display   = 'block';
+    const r     = latestCalc.record;
+    const price = Math.round(r.amount / r.liter);
+    document.getElementById('dashFuel').textContent  = latestCalc.fuel.toFixed(1);
+    document.getElementById('dashTrip').textContent  = latestCalc.trip.toLocaleString();
     document.getElementById('dashPrice').textContent = price.toLocaleString();
+
+    // tank bar
+    const tankWrap = document.getElementById('tankBarWrap');
+    if (settings.tankSize > 0) {
+      const pct = Math.min(100, Math.round((latestCalc.record.liter / settings.tankSize) * 100));
+      tankWrap.style.display = 'block';
+      document.getElementById('tankBar').style.width = pct + '%';
+      document.getElementById('tankPct').textContent = `${pct}%（${latestCalc.record.liter}L / ${settings.tankSize}L）`;
+    } else {
+      tankWrap.style.display = 'none';
+    }
   }
 
+  // history
   const container = document.getElementById('historyList');
   if (records.length === 0) {
     container.innerHTML = '<p class="text-center text-sm py-8" style="color:var(--text-muted)">まだ記録がありません</p>';
@@ -389,22 +853,20 @@ function render() {
   }
 
   const reversed = [...records].reverse();
-  container.innerHTML = reversed.map((r, i) => {
-    const idx = records.indexOf(reversed[i]);
+  container.innerHTML = reversed.map((r, ri) => {
+    const idx   = records.indexOf(r);
     const isFirst = idx === 0;
-    const hasPrev = idx > 0;
-    const prev = hasPrev ? records[idx - 1] : null;
-    const trip = hasPrev ? (r.odo - prev.odo) : null;
-    const fuel = hasPrev ? (trip / r.liter).toFixed(1) : null;
+    const calc  = calcFuelEfficiency(records, idx);
     const price = Math.round(r.amount / r.liter);
 
     return `
     <div class="history-card">
       <div class="flex justify-between items-start mb-2">
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 flex-wrap">
           <span class="text-sm font-semibold">${formatDate(r.date)}</span>
-          ${isFirst ? '<span class="badge first-badge">基準点</span>' : ''}
-          ${i === 0 ? '<span class="badge">最新</span>' : ''}
+          ${isFirst ? '<span class="badge badge-amber">基準点</span>' : ''}
+          ${ri === 0 ? '<span class="badge badge-blue">最新</span>' : ''}
+          ${!r.fullTank ? '<span class="badge badge-gray">部分給油</span>' : ''}
         </div>
         <button class="btn-delete" onclick="deleteRecord(${r.id})">削除</button>
       </div>
@@ -425,30 +887,44 @@ function render() {
           <span style="color:var(--text-muted)">金額</span>
           <span class="font-mono font-semibold">${r.amount.toLocaleString()} 円</span>
         </div>
-        ${hasPrev ? `
+        ${calc ? `
         <div class="flex justify-between col-span-2 pt-1 mt-1 border-t" style="border-color:var(--border)">
           <span style="color:var(--text-muted)">走行距離</span>
-          <span class="font-mono font-semibold" style="color:var(--amber)">${trip.toLocaleString()} km</span>
+          <span class="font-mono font-semibold" style="color:var(--amber)">${calc.trip.toLocaleString()} km</span>
         </div>
         <div class="flex justify-between col-span-2">
           <span style="color:var(--text-muted)">実燃費</span>
-          <span class="font-mono font-bold" style="color:var(--blue)">${fuel} km/L</span>
+          <span class="font-mono font-bold" style="color:var(--blue)">${calc.fuel.toFixed(1)} km/L</span>
         </div>
         ` : `
         <div class="col-span-2 pt-1 mt-1 text-xs border-t" style="border-color:var(--border);color:var(--text-muted)">
-          次回給油時に実燃費が計算されます
+          ${r.fullTank ? '次回満タン給油時に燃費が計算されます' : '部分給油のため燃費は次の満タン時に合算されます'}
         </div>
         `}
       </div>
     </div>`;
   }).join('');
+
+  // update graph and stats if on those pages
+  drawGraph();
+  renderStats();
 }
 
-// 初期化
+// ═══════════════ Tab Navigation ═══════════════
+function switchTab(name) {
+  ['Home','Graph','Settings'].forEach(n => {
+    document.getElementById('page' + n).classList.toggle('active', n === name);
+    document.getElementById('tab'  + n).classList.toggle('active', n === name);
+  });
+  if (name === 'Graph')    { drawGraph(); renderStats(); }
+  if (name === 'Settings') { loadSettingsToForm(); }
+}
+
+// ═══════════════ Init ═══════════════
 document.getElementById('inputDate').value = today();
+loadSettingsToForm();
 render();
 
-// Service Worker登録
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
