@@ -1,0 +1,166 @@
+<svg width="630" height="1365" viewBox="0 0 630 1365" xmlns="http://www.w3.org/2000/svg" font-family="'Helvetica Neue',Arial,'Hiragino Sans',sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1a14"/>
+      <stop offset="100%" stop-color="#11141a"/>
+    </linearGradient>
+    <linearGradient id="frame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2e3550"/>
+      <stop offset="100%" stop-color="#1a1f2e"/>
+    </linearGradient>
+    <linearGradient id="btn" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#22c55e"/>
+    </linearGradient>
+    <linearGradient id="fillGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="50%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#22c55e" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#22c55e" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="30%" cy="70%" r="40%">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="sh">
+      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#000" flood-opacity="0.7"/>
+    </filter>
+    <clipPath id="sc">
+      <rect x="128" y="548" width="374" height="744" rx="36"/>
+    </clipPath>
+  </defs>
+
+  <rect width="630" height="1365" fill="url(#bg)"/>
+  <ellipse cx="315" cy="350" rx="300" ry="260" fill="url(#glow1)"/>
+  <ellipse cx="200" cy="850" rx="250" ry="200" fill="url(#glow2)"/>
+
+  <text x="315" y="110" text-anchor="middle" fill="#6b7280" font-size="13" letter-spacing="3" font-weight="500">ANALYTICS</text>
+  <text x="315" y="175" text-anchor="middle" fill="#e8eaf0" font-size="52" font-weight="800" letter-spacing="-2">燃費の変化を、</text>
+  <text x="315" y="248" text-anchor="middle" fill="#22c55e" font-size="52" font-weight="800" letter-spacing="-2">グラフで追う。</text>
+  <text x="315" y="308" text-anchor="middle" fill="#6b7280" font-size="18">単価推移も切り替えて確認できる</text>
+
+  <rect x="100" y="348" width="430" height="920" rx="58" fill="url(#frame)" stroke="#3a4060" stroke-width="1.5" filter="url(#sh)"/>
+  <rect x="115" y="362" width="400" height="892" rx="46" fill="#11141a"/>
+  <rect x="250" y="376" width="130" height="26" rx="13" fill="#000"/>
+  <rect x="96" y="490" width="5" height="55" rx="2.5" fill="#252a38"/>
+  <rect x="96" y="558" width="5" height="55" rx="2.5" fill="#252a38"/>
+  <rect x="96" y="448" width="5" height="32" rx="2.5" fill="#252a38"/>
+  <rect x="529" y="510" width="5" height="72" rx="2.5" fill="#252a38"/>
+
+  <g clip-path="url(#sc)">
+    <rect x="128" y="548" width="374" height="744" fill="#11141a"/>
+
+    <text x="148" y="574" fill="#9ca3af" font-size="12" font-weight="600">9:41</text>
+    <rect x="456" y="565" width="26" height="13" rx="3" fill="none" stroke="#9ca3af" stroke-width="1.2"/>
+    <rect x="457.5" y="566.5" width="18" height="10" rx="1.5" fill="#9ca3af"/>
+    <rect x="482" y="569" width="3" height="6" rx="1" fill="#9ca3af"/>
+    <rect x="432" y="569" width="3" height="9" rx="1" fill="#9ca3af"/>
+    <rect x="437" y="566" width="3" height="12" rx="1" fill="#9ca3af"/>
+    <rect x="442" y="563" width="3" height="15" rx="1" fill="#9ca3af"/>
+    <rect x="447" y="560" width="3" height="18" rx="1" fill="#9ca3af"/>
+
+    <!-- Header -->
+    <text x="148" y="610" fill="#e8eaf0" font-size="19" font-weight="700">📊 グラフ・統計</text>
+    <text x="148" y="626" fill="#6b7280" font-size="10" letter-spacing="1.5">ANALYSIS</text>
+
+    <!-- Chart type tabs -->
+    <rect x="140" y="640" width="350" height="32" rx="10" fill="#0d1017"/>
+    <rect x="143" y="643" width="168" height="26" rx="8" fill="#3b82f6"/>
+    <text x="227" y="660" text-anchor="middle" fill="white" font-size="11" font-weight="700">燃費推移</text>
+    <text x="398" y="660" text-anchor="middle" fill="#6b7280" font-size="11">単価推移</text>
+
+    <!-- Graph card -->
+    <rect x="140" y="680" width="350" height="200" rx="14" fill="#1a1f2e" stroke="#252a38" stroke-width="1"/>
+
+    <!-- Y axis labels -->
+    <text x="162" y="706" fill="#6b7280" font-size="9">14.0</text>
+    <text x="162" y="730" fill="#6b7280" font-size="9">12.5</text>
+    <text x="162" y="754" fill="#6b7280" font-size="9">11.0</text>
+    <text x="162" y="778" fill="#6b7280" font-size="9">9.5</text>
+    <text x="162" y="802" fill="#6b7280" font-size="9">8.0</text>
+    <!-- Grid lines -->
+    <line x1="180" y1="702" x2="480" y2="702" stroke="#252a38" stroke-width="0.8"/>
+    <line x1="180" y1="726" x2="480" y2="726" stroke="#252a38" stroke-width="0.8"/>
+    <line x1="180" y1="750" x2="480" y2="750" stroke="#252a38" stroke-width="0.8"/>
+    <line x1="180" y1="774" x2="480" y2="774" stroke="#252a38" stroke-width="0.8"/>
+    <line x1="180" y1="798" x2="480" y2="798" stroke="#252a38" stroke-width="0.8"/>
+
+    <!-- Area fill under line -->
+    <polygon points="192,780 240,762 288,744 336,732 384,720 432,714 480,726 480,810 192,810" fill="url(#fillGrad)" opacity="0.8"/>
+
+    <!-- Line chart -->
+    <polyline points="192,780 240,762 288,744 336,732 384,720 432,714 480,726" fill="none" stroke="url(#lineGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Data points -->
+    <circle cx="192" cy="780" r="5" fill="#11141a" stroke="#3b82f6" stroke-width="2.5"/>
+    <circle cx="240" cy="762" r="5" fill="#11141a" stroke="#3b82f6" stroke-width="2.5"/>
+    <circle cx="288" cy="744" r="5" fill="#11141a" stroke="#3b82f6" stroke-width="2.5"/>
+    <circle cx="336" cy="732" r="5" fill="#11141a" stroke="#3b82f6" stroke-width="2.5"/>
+    <circle cx="384" cy="720" r="5" fill="#11141a" stroke="#3b82f6" stroke-width="2.5"/>
+    <circle cx="432" cy="714" r="5" fill="#11141a" stroke="#22c55e" stroke-width="2.5"/>
+    <circle cx="480" cy="726" r="5" fill="#11141a" stroke="#3b82f6" stroke-width="2.5"/>
+
+    <!-- Value labels on chart -->
+    <text x="192" y="774" text-anchor="middle" fill="#e8eaf0" font-size="8.5" font-weight="700">10.2</text>
+    <text x="240" y="756" text-anchor="middle" fill="#e8eaf0" font-size="8.5" font-weight="700">11.0</text>
+    <text x="288" y="738" text-anchor="middle" fill="#e8eaf0" font-size="8.5" font-weight="700">11.5</text>
+    <text x="336" y="726" text-anchor="middle" fill="#e8eaf0" font-size="8.5" font-weight="700">11.9</text>
+    <text x="384" y="714" text-anchor="middle" fill="#e8eaf0" font-size="8.5" font-weight="700">12.4</text>
+    <text x="432" y="708" text-anchor="middle" fill="#22c55e" font-size="8.5" font-weight="700">13.1</text>
+    <text x="480" y="720" text-anchor="middle" fill="#e8eaf0" font-size="8.5" font-weight="700">11.8</text>
+
+    <!-- X axis labels -->
+    <text x="192" y="825" text-anchor="middle" fill="#6b7280" font-size="8">11/5</text>
+    <text x="240" y="825" text-anchor="middle" fill="#6b7280" font-size="8">12/3</text>
+    <text x="288" y="825" text-anchor="middle" fill="#6b7280" font-size="8">1/8</text>
+    <text x="336" y="825" text-anchor="middle" fill="#6b7280" font-size="8">2/12</text>
+    <text x="384" y="825" text-anchor="middle" fill="#6b7280" font-size="8">3/20</text>
+    <text x="432" y="825" text-anchor="middle" fill="#6b7280" font-size="8">4/15</text>
+    <text x="480" y="825" text-anchor="middle" fill="#6b7280" font-size="8">5/28</text>
+
+    <!-- Stats grid -->
+    <rect x="140" y="896" width="350" height="194" rx="14" fill="#1a1f2e" stroke="#252a38" stroke-width="1"/>
+    <rect x="152" y="906" width="3" height="12" fill="#3b82f6"/>
+    <text x="160" y="916" fill="#6b7280" font-size="10" letter-spacing="2" font-weight="600">累計統計</text>
+
+    <rect x="148" y="928" width="158" height="62" rx="12" fill="#0d1017"/>
+    <text x="227" y="944" text-anchor="middle" fill="#6b7280" font-size="9">平均燃費</text>
+    <text x="227" y="966" text-anchor="middle" fill="#3b82f6" font-size="22" font-weight="800">12.4</text>
+    <text x="227" y="982" text-anchor="middle" fill="#6b7280" font-size="9">km/L</text>
+
+    <rect x="314" y="928" width="168" height="62" rx="12" fill="#0d1017"/>
+    <text x="398" y="944" text-anchor="middle" fill="#6b7280" font-size="9">平均単価</text>
+    <text x="398" y="966" text-anchor="middle" fill="#f59e0b" font-size="22" font-weight="800">168</text>
+    <text x="398" y="982" text-anchor="middle" fill="#6b7280" font-size="9">円/L</text>
+
+    <rect x="148" y="998" width="158" height="62" rx="12" fill="#0d1017"/>
+    <text x="227" y="1014" text-anchor="middle" fill="#6b7280" font-size="9">総走行距離</text>
+    <text x="227" y="1036" text-anchor="middle" fill="#22c55e" font-size="22" font-weight="800">5,240</text>
+    <text x="227" y="1052" text-anchor="middle" fill="#6b7280" font-size="9">km</text>
+
+    <rect x="314" y="998" width="168" height="62" rx="12" fill="#0d1017"/>
+    <text x="398" y="1014" text-anchor="middle" fill="#6b7280" font-size="9">総給油コスト</text>
+    <text x="398" y="1036" text-anchor="middle" fill="#e8eaf0" font-size="18" font-weight="800">¥68,400</text>
+    <text x="398" y="1052" text-anchor="middle" fill="#6b7280" font-size="9">円</text>
+
+    <!-- Tab bar -->
+    <rect x="128" y="1248" width="374" height="44" fill="rgba(17,20,26,0.96)" stroke="#252a38" stroke-width="0.8"/>
+    <text x="210" y="1264" text-anchor="middle" fill="#6b7280" font-size="16">⌂</text>
+    <text x="210" y="1278" text-anchor="middle" fill="#6b7280" font-size="9">ホーム</text>
+    <text x="315" y="1264" text-anchor="middle" fill="#3b82f6" font-size="15">⌇</text>
+    <text x="315" y="1278" text-anchor="middle" fill="#3b82f6" font-size="9" font-weight="600">グラフ</text>
+    <rect x="309" y="1284" width="12" height="2" rx="1" fill="#3b82f6"/>
+    <text x="420" y="1264" text-anchor="middle" fill="#6b7280" font-size="15">⚙</text>
+    <text x="420" y="1278" text-anchor="middle" fill="#6b7280" font-size="9">設定</text>
+    <rect x="260" y="1284" width="110" height="4" rx="2" fill="#3a4060"/>
+  </g>
+
+  <text x="315" y="1318" text-anchor="middle" fill="#374151" font-size="13" font-weight="500">⛽ 燃費トラッカー</text>
+  <text x="315" y="1343" text-anchor="middle" fill="#1f2937" font-size="12">hajihajitsubo.github.io/fuel-tracker</text>
+</svg>
