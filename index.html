@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+  <title>燃費トラッカー</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#11141a" />
+
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="燃費" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg-deep: #11141a;
+      --bg-card: #1a1f2e;
+      --bg-input: #0d1017;
+      --border: #2a3044;
+      --blue: #3b82f6;
+      --blue-dim: #1d4ed8;
+      --amber: #f59e0b;
+      --text-primary: #e8eaf0;
+      --text-muted: #6b7280;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background-color: var(--bg-deep);
+      color: var(--text-primary);
+      font-family: 'SF Pro Display', 'Hiragino Sans', 'Meiryo', sans-serif;
+      min-height: 100vh;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .stat-value {
+      font-size: 2.8rem;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -1px;
+      color: var(--blue);
+      text-shadow: 0 0 20px rgba(59,130,246,0.4);
+    }
+
+    .stat-unit {
+      font-size: 1rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .amber-val {
+      color: var(--amber);
+      text-shadow: 0 0 20px rgba(245,158,11,0.4);
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"] {
+      background: var(--bg-input);
+      border: 1.5px solid var(--border);
+      color: var(--text-primary);
+      border-radius: 12px;
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 1.1rem;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+
+    input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.5);
+    }
+
+    label {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dim) 100%);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      width: 100%;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: opacity 0.15s, transform 0.1s;
+      box-shadow: 0 4px 20px rgba(59,130,246,0.3);
+    }
+
+    .btn-primary:active {
+      opacity: 0.85;
+      transform: scale(0.98);
+    }
+
+    .btn-delete {
+      background: none;
+      border: 1px solid #3a2020;
+      color: #9a5a5a;
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-delete:hover {
+      background: rgba(239,68,68,0.15);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .history-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      transition: border-color 0.2s;
+    }
+
+    .history-card:hover {
+      border-color: #3a4060;
+    }
+
+    .divider {
+      width: 1px;
+      background: var(--border);
+      align-self: stretch;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(59,130,246,0.15);
+      color: var(--blue);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .first-badge {
+      background: rgba(245,158,11,0.15);
+      color: var(--amber);
+    }
+
+    .section-title {
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      border-left: 2px solid var(--blue);
+      padding-left: 10px;
+    }
+
+    .notice-box {
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<div class="max-w-md mx-auto px-4 py-6">
+
+  <!-- ヘッダー -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-xl font-bold tracking-tight">⛽ 燃費トラッカー</h1>
+      <p class="text-xs mt-0.5" style="color:var(--text-muted)">MY FUEL LOG</p>
+    </div>
+    <div id="totalCount" class="text-right">
+      <div class="text-2xl font-bold" style="color:var(--blue)">0</div>
+      <div class="text-xs" style="color:var(--text-muted)">給油回数</div>
+    </div>
+  </div>
+
+  <!-- ダッシュボード -->
+  <div id="dashboard" class="card p-5 mb-5" style="display:none">
+    <div class="section-title mb-4">前回給油との比較</div>
+    <div class="flex gap-4 justify-around">
+      <div class="text-center flex-1">
+        <div class="stat-label mb-2">実燃費</div>
+        <div class="stat-value" id="dashFuel">--</div>
+        <div class="stat-unit">km/L</div>
+      </div>
+      <div class="divider"></div>
+      <div class="text-center flex-1">
+        <div class="stat-label mb-2">走行距離</div>
+        <div class="stat-value amber-val" id="dashTrip">--</div>
+        <div class="stat-unit">km</div>
+      </div>
+      <div class="divider"></div>
+      <div class="text-center flex-1">
+        <div class="stat-label mb-2">単価</div>
+        <div class="stat-value" id="dashPrice" style="font-size:2rem">--</div>
+        <div class="stat-unit">円/L</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 初回アナウンス -->
+  <div id="firstNotice" class="notice-box mb-5" style="display:none">
+    <div class="flex items-start gap-3">
+      <span class="text-xl">📍</span>
+      <div>
+        <p class="font-semibold text-sm" style="color:var(--amber)">初回登録について</p>
+        <p class="text-sm mt-1" style="color:var(--text-muted)">この給油データが基準点になります。次回給油時に実燃費・走行距離が自動計算されます。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 入力フォーム -->
+  <div class="card p-5 mb-5">
+    <div class="section-title mb-4">給油データ入力</div>
+    <div class="space-y-4">
+      <div>
+        <label>給油日</label>
+        <input type="date" id="inputDate" />
+      </div>
+      <div>
+        <label>総走行距離（Odoメーター）</label>
+        <input type="number" id="inputOdo" placeholder="例：15420" inputmode="decimal" />
+      </div>
+      <div class="flex gap-3">
+        <div class="flex-1">
+          <label>給油量</label>
+          <input type="number" id="inputLiter" placeholder="例：35.5" inputmode="decimal" step="0.01" />
+        </div>
+        <div class="flex-1">
+          <label>合計金額</label>
+          <input type="number" id="inputAmount" placeholder="例：5800" inputmode="numeric" />
+        </div>
+      </div>
+      <button class="btn-primary" onclick="addRecord()">記録する</button>
+    </div>
+  </div>
+
+  <!-- エラー表示 -->
+  <div id="errorMsg" class="text-sm text-center mb-4" style="color:var(--danger);display:none"></div>
+
+  <!-- 履歴 -->
+  <div>
+    <div class="section-title mb-3">給油履歴</div>
+    <div id="historyList" class="space-y-3">
+      <p class="text-center text-sm py-8" style="color:var(--text-muted)">まだ記録がありません</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'fuelTracker_v1';
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
+}
+
+function save(records) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+}
+
+function formatDate(dateStr) {
+  const [y, m, d] = dateStr.split('-');
+  return `${y}/${m}/${d}`;
+}
+
+function today() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+function addRecord() {
+  const date   = document.getElementById('inputDate').value;
+  const odo    = parseFloat(document.getElementById('inputOdo').value);
+  const liter  = parseFloat(document.getElementById('inputLiter').value);
+  const amount = parseFloat(document.getElementById('inputAmount').value);
+
+  if (!date)         return showError('給油日を入力してください');
+  if (isNaN(odo))    return showError('総走行距離を入力してください');
+  if (isNaN(liter) || liter <= 0) return showError('給油量を入力してください');
+  if (isNaN(amount) || amount <= 0) return showError('合計金額を入力してください');
+
+  const records = load();
+
+  if (records.length > 0) {
+    const last = records[records.length - 1];
+    if (odo <= last.odo) {
+      return showError(`総走行距離は前回(${last.odo.toLocaleString()}km)より大きい値を入力してください`);
+    }
+  }
+
+  const record = { date, odo, liter, amount, id: Date.now() };
+  records.push(record);
+  save(records);
+
+  document.getElementById('inputOdo').value = '';
+  document.getElementById('inputLiter').value = '';
+  document.getElementById('inputAmount').value = '';
+  document.getElementById('inputDate').value = today();
+
+  render();
+}
+
+function deleteRecord(id) {
+  if (!confirm('このデータを削除しますか？')) return;
+  const records = load().filter(r => r.id !== id);
+  save(records);
+  render();
+}
+
+function render() {
+  const records = load();
+  document.getElementById('totalCount').querySelector('div').textContent = records.length;
+
+  const dashboard = document.getElementById('dashboard');
+  const firstNotice = document.getElementById('firstNotice');
+
+  if (records.length === 0) {
+    dashboard.style.display = 'none';
+    firstNotice.style.display = 'none';
+  } else if (records.length === 1) {
+    dashboard.style.display = 'none';
+    firstNotice.style.display = 'block';
+  } else {
+    firstNotice.style.display = 'none';
+    dashboard.style.display = 'block';
+    const last = records[records.length - 1];
+    const prev = records[records.length - 2];
+    const trip = last.odo - prev.odo;
+    const fuel = (trip / last.liter).toFixed(1);
+    const price = Math.round(last.amount / last.liter);
+    document.getElementById('dashFuel').textContent = fuel;
+    document.getElementById('dashTrip').textContent = trip.toLocaleString();
+    document.getElementById('dashPrice').textContent = price.toLocaleString();
+  }
+
+  const container = document.getElementById('historyList');
+  if (records.length === 0) {
+    container.innerHTML = '<p class="text-center text-sm py-8" style="color:var(--text-muted)">まだ記録がありません</p>';
+    return;
+  }
+
+  const reversed = [...records].reverse();
+  container.innerHTML = reversed.map((r, i) => {
+    const idx = records.indexOf(reversed[i]);
+    const isFirst = idx === 0;
+    const hasPrev = idx > 0;
+    const prev = hasPrev ? records[idx - 1] : null;
+    const trip = hasPrev ? (r.odo - prev.odo) : null;
+    const fuel = hasPrev ? (trip / r.liter).toFixed(1) : null;
+    const price = Math.round(r.amount / r.liter);
+
+    return `
+    <div class="history-card">
+      <div class="flex justify-between items-start mb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-semibold">${formatDate(r.date)}</span>
+          ${isFirst ? '<span class="badge first-badge">基準点</span>' : ''}
+          ${i === 0 ? '<span class="badge">最新</span>' : ''}
+        </div>
+        <button class="btn-delete" onclick="deleteRecord(${r.id})">削除</button>
+      </div>
+      <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+        <div class="flex justify-between">
+          <span style="color:var(--text-muted)">Odo</span>
+          <span class="font-mono font-semibold">${r.odo.toLocaleString()} km</span>
+        </div>
+        <div class="flex justify-between">
+          <span style="color:var(--text-muted)">単価</span>
+          <span class="font-mono font-semibold">${price.toLocaleString()} 円/L</span>
+        </div>
+        <div class="flex justify-between">
+          <span style="color:var(--text-muted)">給油量</span>
+          <span class="font-mono font-semibold">${r.liter} L</span>
+        </div>
+        <div class="flex justify-between">
+          <span style="color:var(--text-muted)">金額</span>
+          <span class="font-mono font-semibold">${r.amount.toLocaleString()} 円</span>
+        </div>
+        ${hasPrev ? `
+        <div class="flex justify-between col-span-2 pt-1 mt-1 border-t" style="border-color:var(--border)">
+          <span style="color:var(--text-muted)">走行距離</span>
+          <span class="font-mono font-semibold" style="color:var(--amber)">${trip.toLocaleString()} km</span>
+        </div>
+        <div class="flex justify-between col-span-2">
+          <span style="color:var(--text-muted)">実燃費</span>
+          <span class="font-mono font-bold" style="color:var(--blue)">${fuel} km/L</span>
+        </div>
+        ` : `
+        <div class="col-span-2 pt-1 mt-1 text-xs border-t" style="border-color:var(--border);color:var(--text-muted)">
+          次回給油時に実燃費が計算されます
+        </div>
+        `}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// 初期化
+document.getElementById('inputDate').value = today();
+render();
+
+// Service Worker登録
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
