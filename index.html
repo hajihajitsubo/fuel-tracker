@@ -4,930 +4,1297 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
   <title>燃費トラッカー</title>
-
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#11141a" />
-
-  <!-- iOS PWA -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="燃費" />
   <link rel="apple-touch-icon" href="icon-192.png" />
-
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
-      --bg-deep: #11141a;
-      --bg-card: #1a1f2e;
-      --bg-input: #0d1017;
-      --border: #2a3044;
-      --blue: #3b82f6;
-      --blue-dim: #1d4ed8;
-      --amber: #f59e0b;
-      --green: #22c55e;
-      --text-primary: #e8eaf0;
-      --text-muted: #6b7280;
-      --danger: #ef4444;
-      --tab-h: 64px;
+      --bg:     #11141a;
+      --card:   #1a1f2e;
+      --input:  #0d1017;
+      --border: #252a38;
+      --blue:   #3b82f6;
+      --blue2:  #1d4ed8;
+      --amber:  #f59e0b;
+      --green:  #22c55e;
+      --red:    #ef4444;
+      --txt:    #e8eaf0;
+      --muted:  #6b7280;
+      --tab-h:  60px;
     }
-
-    * { box-sizing: border-box; }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body {
-      background-color: var(--bg-deep);
-      color: var(--text-primary);
-      font-family: 'SF Pro Display', 'Hiragino Sans', 'Meiryo', sans-serif;
+      background: var(--bg); color: var(--txt);
+      font-family: 'SF Pro Display','Hiragino Sans','Meiryo',sans-serif;
       min-height: 100vh;
       padding-top: env(safe-area-inset-top);
-      padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom));
+      padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom) + 8px);
+      overscroll-behavior: none;
     }
 
-    /* ── Tab ── */
+    /* ─── Tab Bar ─── */
     .tab-bar {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
+      position: fixed; bottom: 0; left: 0; right: 0;
       height: calc(var(--tab-h) + env(safe-area-inset-bottom));
       padding-bottom: env(safe-area-inset-bottom);
-      background: rgba(17,20,26,0.92);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(17,20,26,.95);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       border-top: 1px solid var(--border);
-      display: flex;
-      z-index: 100;
+      display: flex; z-index: 100;
     }
-
-    .tab-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      cursor: pointer;
-      color: var(--text-muted);
-      font-size: 0.65rem;
-      letter-spacing: 0.05em;
-      transition: color 0.15s;
-      border: none;
-      background: none;
-      padding: 0;
+    .tab-btn {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 3px; border: none; background: none;
+      color: var(--muted); font-size: .62rem; letter-spacing: .04em;
+      cursor: pointer; transition: color .15s; padding: 0;
     }
+    .tab-btn.on { color: var(--blue); }
+    .tab-btn svg { width: 22px; height: 22px; }
 
-    .tab-item.active { color: var(--blue); }
-    .tab-item svg { width: 22px; height: 22px; }
-
-    /* ── Page ── */
+    /* ─── Pages ─── */
     .page { display: none; }
-    .page.active { display: block; }
+    .page.on { display: block; }
 
-    /* ── Card ── */
+    /* ─── Card ─── */
     .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+    }
+    .section-ttl {
+      font-size: .68rem; letter-spacing: .14em; color: var(--muted);
+      text-transform: uppercase; border-left: 2px solid var(--blue); padding-left: 9px;
     }
 
-    /* ── Stats ── */
-    .stat-value {
-      font-size: 2.8rem;
-      font-weight: 700;
-      line-height: 1;
-      letter-spacing: -1px;
-      color: var(--blue);
-      text-shadow: 0 0 20px rgba(59,130,246,0.4);
-    }
-    .stat-unit { font-size: 1rem; color: var(--text-muted); }
-    .stat-label { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
-    .amber-val { color: var(--amber); text-shadow: 0 0 20px rgba(245,158,11,0.4); }
+    /* ─── Dashboard stats ─── */
+    .stat-big { font-size: 2.6rem; font-weight: 700; line-height: 1; letter-spacing: -1px; }
+    .stat-sm  { font-size: 1.4rem; font-weight: 700; line-height: 1; }
+    .stat-unit { font-size: .85rem; color: var(--muted); }
+    .stat-lbl  { font-size: .65rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+    .blue-glow  { color: var(--blue);  text-shadow: 0 0 18px rgba(59,130,246,.45); }
+    .amber-glow { color: var(--amber); text-shadow: 0 0 18px rgba(245,158,11,.45); }
+    .green-glow { color: var(--green); text-shadow: 0 0 18px rgba(34,197,94,.4); }
+    .vdiv { width: 1px; background: var(--border); align-self: stretch; }
 
-    /* ── Input ── */
-    input[type="text"],
-    input[type="number"],
-    input[type="date"],
-    select {
-      background: var(--bg-input);
-      border: 1.5px solid var(--border);
-      color: var(--text-primary);
-      border-radius: 12px;
-      width: 100%;
-      padding: 14px 16px;
-      font-size: 1.05rem;
-      outline: none;
-      transition: border-color 0.2s;
-      -webkit-appearance: none;
-      appearance: none;
+    /* ─── Input row (tap-to-edit) ─── */
+    .input-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
+      cursor: pointer; user-select: none; transition: background .12s;
+      -webkit-user-select: none;
     }
-    input:focus, select:focus {
-      border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
-    }
-    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); }
+    .input-row:last-child { border-bottom: none; }
+    .input-row:active { background: rgba(255,255,255,.03); }
+    .input-row.filled .row-value { color: var(--txt); }
+    .row-label { font-size: .75rem; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+    .row-value { font-size: 1.2rem; font-weight: 600; color: #3a4160; font-variant-numeric: tabular-nums; }
+    .row-unit  { font-size: .8rem; color: var(--muted); margin-left: 4px; }
+    .row-arrow { color: var(--muted); margin-left: 8px; font-size: .9rem; }
 
-    label {
-      display: block;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      letter-spacing: 0.08em;
-      margin-bottom: 6px;
-      text-transform: uppercase;
+    /* ─── Preview bar ─── */
+    .preview-card {
+      background: rgba(59,130,246,.06); border: 1px solid rgba(59,130,246,.2);
+      border-radius: 14px; padding: 12px 16px;
     }
+    .preview-item { display: flex; justify-content: space-between; align-items: center; }
+    .preview-label { font-size: .75rem; color: var(--muted); }
+    .preview-val   { font-size: 1rem; font-weight: 700; color: var(--blue); font-variant-numeric: tabular-nums; }
 
-    /* ── Toggle ── */
-    .toggle-wrap { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-    .toggle { position: relative; width: 44px; height: 26px; }
-    .toggle input { opacity: 0; width: 0; height: 0; }
-    .toggle-slider {
-      position: absolute; inset: 0;
-      background: var(--border);
-      border-radius: 26px;
-      transition: 0.2s;
+    /* ─── Toggle switch ─── */
+    .sw-wrap { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .sw { position: relative; width: 40px; height: 24px; flex-shrink: 0; }
+    .sw input { opacity: 0; width: 0; height: 0; }
+    .sw-track {
+      position: absolute; inset: 0; background: var(--border);
+      border-radius: 24px; transition: background .18s;
     }
-    .toggle-slider::before {
-      content: '';
-      position: absolute;
-      width: 20px; height: 20px;
-      left: 3px; top: 3px;
-      background: #fff;
-      border-radius: 50%;
-      transition: 0.2s;
+    .sw-track::before {
+      content: ''; position: absolute;
+      width: 18px; height: 18px; left: 3px; top: 3px;
+      background: #fff; border-radius: 50%; transition: transform .18s;
     }
-    .toggle input:checked + .toggle-slider { background: var(--blue); }
-    .toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+    .sw input:checked ~ .sw-track { background: var(--blue); }
+    .sw input:checked ~ .sw-track::before { transform: translateX(16px); }
 
-    /* ── Buttons ── */
-    .btn-primary {
-      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dim) 100%);
-      color: #fff;
-      border: none;
-      border-radius: 14px;
-      padding: 16px;
-      font-size: 1.1rem;
-      font-weight: 700;
-      width: 100%;
-      cursor: pointer;
-      letter-spacing: 0.05em;
-      transition: opacity 0.15s, transform 0.1s;
-      box-shadow: 0 4px 20px rgba(59,130,246,0.3);
+    /* ─── Buttons ─── */
+    .btn-main {
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      color: #fff; border: none; border-radius: 14px;
+      padding: 17px; font-size: 1.1rem; font-weight: 700;
+      width: 100%; cursor: pointer; letter-spacing: .04em;
+      box-shadow: 0 4px 22px rgba(59,130,246,.35);
+      transition: opacity .12s, transform .1s;
     }
-    .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
+    .btn-main:active { opacity: .82; transform: scale(.98); }
+    .btn-main:disabled { opacity: .35; }
 
-    .btn-secondary {
-      background: var(--bg-input);
-      color: var(--text-primary);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px;
-      font-size: 1rem;
-      font-weight: 600;
-      width: 100%;
-      cursor: pointer;
-      transition: border-color 0.15s;
+    .btn-sub {
+      background: var(--input); color: var(--txt);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 13px 16px; font-size: .95rem; font-weight: 600;
+      width: 100%; cursor: pointer; transition: border-color .15s;
     }
-    .btn-secondary:hover { border-color: var(--blue); }
+    .btn-sub:hover { border-color: var(--blue); }
 
-    .btn-delete {
-      background: none;
-      border: 1px solid #3a2020;
-      color: #9a5a5a;
-      border-radius: 8px;
-      padding: 4px 10px;
-      font-size: 0.78rem;
-      cursor: pointer;
-      transition: all 0.15s;
+    .btn-del {
+      background: none; border: 1px solid #3a2020; color: #9a5a5a;
+      border-radius: 8px; padding: 4px 10px; font-size: .75rem;
+      cursor: pointer; transition: all .15s; flex-shrink: 0;
     }
-    .btn-delete:hover { background: rgba(239,68,68,0.15); border-color: var(--danger); color: var(--danger); }
+    .btn-del:active { background: rgba(239,68,68,.15); border-color: var(--red); color: var(--red); }
 
-    /* ── History ── */
-    .history-card {
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 16px;
-      transition: border-color 0.2s;
+    /* ─── History ─── */
+    .hist-card {
+      background: var(--input); border: 1px solid var(--border);
+      border-radius: 12px; padding: 13px 15px;
     }
-    .history-card:hover { border-color: #3a4060; }
+    .month-header {
+      font-size: .68rem; letter-spacing: .14em; color: var(--muted);
+      text-transform: uppercase; margin: 18px 0 8px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .month-total { font-size: .75rem; color: var(--amber); font-weight: 600; }
 
-    /* ── Misc ── */
-    .divider { width: 1px; background: var(--border); align-self: stretch; }
-
+    /* ─── Badge ─── */
     .badge {
-      display: inline-block;
-      border-radius: 6px;
-      padding: 2px 8px;
-      font-size: 0.72rem;
-      font-weight: 600;
+      display: inline-block; border-radius: 6px; padding: 2px 7px;
+      font-size: .68rem; font-weight: 700; letter-spacing: .04em;
     }
-    .badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
-    .badge-amber { background: rgba(245,158,11,0.15); color: var(--amber); }
-    .badge-gray { background: rgba(107,114,128,0.2); color: var(--text-muted); }
+    .badge-blue  { background: rgba(59,130,246,.15); color: var(--blue); }
+    .badge-amber { background: rgba(245,158,11,.15);  color: var(--amber); }
+    .badge-gray  { background: rgba(107,114,128,.18); color: var(--muted); }
+    .badge-green { background: rgba(34,197,94,.15);   color: var(--green); }
 
-    .section-title {
-      font-size: 0.72rem;
-      letter-spacing: 0.15em;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      border-left: 2px solid var(--blue);
-      padding-left: 10px;
+    /* ─── Notice ─── */
+    .notice {
+      background: rgba(245,158,11,.07); border: 1px solid rgba(245,158,11,.22);
+      border-radius: 14px; padding: 14px 16px;
     }
 
-    .notice-box {
-      background: rgba(245,158,11,0.08);
-      border: 1px solid rgba(245,158,11,0.25);
-      border-radius: 12px;
-      padding: 14px 16px;
+    /* ─── Range bar ─── */
+    .bar-track { height: 6px; background: var(--input); border-radius: 4px; overflow: hidden; }
+    .bar-fill  { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--blue), var(--green)); transition: width .4s; }
+
+    /* ─── Success toast ─── */
+    .toast {
+      position: fixed; top: calc(env(safe-area-inset-top) + 12px);
+      left: 50%; transform: translateX(-50%) translateY(-80px);
+      background: var(--green); color: #fff;
+      border-radius: 30px; padding: 10px 22px;
+      font-size: .9rem; font-weight: 700;
+      z-index: 500; transition: transform .3s cubic-bezier(.4,0,.2,1);
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ─── Graph chart tabs ─── */
+    .chart-tab-wrap { display: flex; background: var(--input); border-radius: 10px; padding: 3px; margin-bottom: 16px; }
+    .chart-tab {
+      flex: 1; text-align: center; padding: 7px 4px;
+      font-size: .78rem; font-weight: 600; border-radius: 8px;
+      cursor: pointer; color: var(--muted); transition: all .15s; border: none; background: none;
+    }
+    .chart-tab.on { background: var(--blue); color: #fff; }
+
+    /* ─── Settings rows ─── */
+    .set-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 16px; border-bottom: 1px solid var(--border);
+    }
+    .set-row:last-child { border-bottom: none; }
+    .set-input {
+      background: var(--input); border: 1.5px solid var(--border);
+      color: var(--txt); border-radius: 10px; padding: 9px 13px;
+      font-size: 1rem; outline: none; width: 160px; text-align: right;
+      transition: border-color .2s;
+    }
+    .set-input:focus { border-color: var(--blue); }
+
+    /* ─── Numpad overlay ─── */
+    .np-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.55);
+      z-index: 300; display: flex; flex-direction: column;
+      justify-content: flex-end;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s;
+    }
+    .np-overlay.open { opacity: 1; pointer-events: all; }
+    .np-sheet {
+      background: #1e2330; border-top: 1px solid var(--border);
+      border-radius: 24px 24px 0 0;
+      padding: 16px 16px calc(env(safe-area-inset-bottom) + 12px);
+      transform: translateY(100%);
+      transition: transform .28s cubic-bezier(.4,0,.2,1);
+    }
+    .np-overlay.open .np-sheet { transform: translateY(0); }
+
+    .np-display {
+      text-align: center; padding: 8px 0 16px;
+      border-bottom: 1px solid var(--border); margin-bottom: 14px;
+    }
+    .np-field-name { font-size: .7rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 4px; }
+    .np-value {
+      font-size: 2.8rem; font-weight: 700; color: var(--txt);
+      letter-spacing: -1px; font-variant-numeric: tabular-nums;
+      min-height: 3.2rem; line-height: 1;
+    }
+    .np-value.placeholder { color: #2a3050; }
+    .np-hint { font-size: .8rem; color: var(--blue); margin-top: 5px; min-height: 1.1rem; }
+    .np-quickfill {
+      display: inline-block; background: rgba(59,130,246,.12); color: var(--blue);
+      border: 1px solid rgba(59,130,246,.25); border-radius: 20px;
+      padding: 3px 12px; font-size: .75rem; font-weight: 600;
+      cursor: pointer; margin-top: 4px;
     }
 
-    /* ── Tank bar ── */
-    .tank-bar-wrap { height: 6px; background: var(--bg-input); border-radius: 4px; overflow: hidden; }
-    .tank-bar { height: 100%; border-radius: 4px; transition: width 0.4s; background: linear-gradient(90deg, var(--blue), var(--green)); }
-
-    /* ── Graph ── */
-    #graphCanvas { width: 100%; border-radius: 12px; display: block; }
-
-    /* ── Settings row ── */
-    .setting-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border);
+    .np-keys {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 8px; margin-bottom: 10px;
     }
-    .setting-row:last-child { border-bottom: none; }
+    .np-key {
+      background: var(--card); border: none; border-radius: 12px;
+      color: var(--txt); font-size: 1.6rem; font-weight: 500;
+      padding: 16px 0; cursor: pointer; transition: background .1s;
+      touch-action: manipulation;
+    }
+    .np-key:active { background: #2a3250; }
+    .np-key.zero { grid-column: span 1; }
+    .np-key.del  { background: #1a1f2e; font-size: 1.3rem; }
+    .np-key.dot  { font-size: 1.8rem; }
 
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
+    .np-confirm {
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      color: #fff; border: none; border-radius: 14px;
+      padding: 15px; font-size: 1.05rem; font-weight: 700;
+      width: 100%; cursor: pointer;
+      box-shadow: 0 4px 18px rgba(59,130,246,.3);
+      touch-action: manipulation;
+    }
+
+    /* ─── Mode chip ─── */
+    .mode-chip {
+      display: inline-flex; background: var(--input); border: 1px solid var(--border);
+      border-radius: 20px; overflow: hidden; font-size: .72rem; font-weight: 600;
+    }
+    .mode-opt {
+      padding: 5px 12px; cursor: pointer; color: var(--muted);
+      transition: all .15s; border: none; background: none;
+    }
+    .mode-opt.on { background: var(--blue); color: #fff; }
+
+    canvas { display: block; width: 100%; border-radius: 10px; }
+
+    ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
   </style>
 </head>
 <body>
 
-<!-- ═══════════════ HOME ═══════════════ -->
-<div id="pageHome" class="page active">
-<div class="max-w-md mx-auto px-4 py-6">
+<!-- ──────── SUCCESS TOAST ──────── -->
+<div class="toast" id="toast">✓ 記録しました</div>
 
-  <!-- ヘッダー -->
-  <div class="flex items-center justify-between mb-6">
+<!-- ──────── NUMPAD OVERLAY ──────── -->
+<div class="np-overlay" id="npOverlay" onclick="npBgClose(event)">
+  <div class="np-sheet">
+    <div class="np-display">
+      <div class="np-field-name" id="npLabel">給油量</div>
+      <div class="np-value placeholder" id="npVal">0</div>
+      <div class="np-hint" id="npHint"></div>
+    </div>
+    <div class="np-keys">
+      <button class="np-key" ontouchend="npKey(event,'1')" onclick="npKey(event,'1')">1</button>
+      <button class="np-key" ontouchend="npKey(event,'2')" onclick="npKey(event,'2')">2</button>
+      <button class="np-key" ontouchend="npKey(event,'3')" onclick="npKey(event,'3')">3</button>
+      <button class="np-key" ontouchend="npKey(event,'4')" onclick="npKey(event,'4')">4</button>
+      <button class="np-key" ontouchend="npKey(event,'5')" onclick="npKey(event,'5')">5</button>
+      <button class="np-key" ontouchend="npKey(event,'6')" onclick="npKey(event,'6')">6</button>
+      <button class="np-key" ontouchend="npKey(event,'7')" onclick="npKey(event,'7')">7</button>
+      <button class="np-key" ontouchend="npKey(event,'8')" onclick="npKey(event,'8')">8</button>
+      <button class="np-key" ontouchend="npKey(event,'9')" onclick="npKey(event,'9')">9</button>
+      <button class="np-key dot" id="npDotBtn" ontouchend="npKey(event,'.')" onclick="npKey(event,'.')">·</button>
+      <button class="np-key zero" ontouchend="npKey(event,'0')" onclick="npKey(event,'0')">0</button>
+      <button class="np-key del" ontouchend="npKey(event,'⌫')" onclick="npKey(event,'⌫')">⌫</button>
+    </div>
+    <button class="np-confirm" id="npConfirm" ontouchend="npConfirm(event)" onclick="npConfirm(event)">次へ →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: HOME
+══════════════════════════════════════ -->
+<div id="pgHome" class="page on">
+<div class="max-w-md mx-auto px-4 py-5">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-5">
     <div>
       <h1 class="text-xl font-bold tracking-tight">⛽ 燃費トラッカー</h1>
-      <p class="text-xs mt-0.5" id="headerCarName" style="color:var(--text-muted)">MY FUEL LOG</p>
+      <p class="text-xs mt-0.5" id="hdrCar" style="color:var(--muted)">MY FUEL LOG</p>
     </div>
     <div class="text-right">
-      <div class="text-2xl font-bold" id="totalCount" style="color:var(--blue)">0</div>
-      <div class="text-xs" style="color:var(--text-muted)">給油回数</div>
+      <div class="text-2xl font-bold blue-glow" id="hdrCount">0</div>
+      <div class="text-xs" style="color:var(--muted)">給油回数</div>
     </div>
   </div>
 
-  <!-- ダッシュボード -->
-  <div id="dashboard" class="card p-5 mb-5" style="display:none">
-    <div class="section-title mb-4">最新の給油結果</div>
-    <div class="flex gap-4 justify-around">
-      <div class="text-center flex-1">
-        <div class="stat-label mb-2">実燃費</div>
-        <div class="stat-value" id="dashFuel">--</div>
+  <!-- Dashboard -->
+  <div id="dash" class="card p-4 mb-4" style="display:none">
+    <div class="section-ttl mb-4">最新の給油結果</div>
+    <!-- Row 1: big stats -->
+    <div class="flex gap-3 mb-4">
+      <div class="flex-1 text-center">
+        <div class="stat-lbl mb-1">実燃費</div>
+        <div class="stat-big blue-glow" id="dFuel">--</div>
         <div class="stat-unit">km/L</div>
       </div>
-      <div class="divider"></div>
-      <div class="text-center flex-1">
-        <div class="stat-label mb-2">走行距離</div>
-        <div class="stat-value amber-val" id="dashTrip">--</div>
+      <div class="vdiv"></div>
+      <div class="flex-1 text-center">
+        <div class="stat-lbl mb-1">走行距離</div>
+        <div class="stat-big amber-glow" id="dTrip">--</div>
         <div class="stat-unit">km</div>
       </div>
-      <div class="divider"></div>
-      <div class="text-center flex-1">
-        <div class="stat-label mb-2">単価</div>
-        <div class="stat-value" id="dashPrice" style="font-size:2rem">--</div>
+    </div>
+    <!-- Row 2: small stats -->
+    <div class="flex gap-2 mb-3">
+      <div class="flex-1 text-center" style="background:var(--input);border-radius:10px;padding:10px 6px">
+        <div class="stat-lbl mb-1">単価</div>
+        <div class="stat-sm blue-glow" id="dPrice">--</div>
+        <div class="stat-unit" style="font-size:.7rem">円/L</div>
+      </div>
+      <div class="flex-1 text-center" style="background:var(--input);border-radius:10px;padding:10px 6px">
+        <div class="stat-lbl mb-1">燃料コスト</div>
+        <div class="stat-sm amber-glow" id="dCostKm">--</div>
+        <div class="stat-unit" style="font-size:.7rem">円/km</div>
+      </div>
+      <div class="flex-1 text-center" style="background:var(--input);border-radius:10px;padding:10px 6px">
+        <div class="stat-lbl mb-1">今回金額</div>
+        <div class="stat-sm green-glow" id="dAmount">--</div>
+        <div class="stat-unit" style="font-size:.7rem">円</div>
+      </div>
+    </div>
+    <!-- Range estimate -->
+    <div id="rangeWrap" style="display:none">
+      <div class="flex justify-between text-xs mb-1" style="color:var(--muted)">
+        <span>満タン航続距離の目安</span>
+        <span id="rangeVal" style="color:var(--green);font-weight:700"></span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="rangeBar" style="width:60%"></div></div>
+    </div>
+  </div>
+
+  <!-- First notice -->
+  <div id="firstNotice" class="notice mb-4" style="display:none">
+    <div class="flex gap-3">
+      <span>📍</span>
+      <div>
+        <p class="font-semibold text-sm" style="color:var(--amber)">初回登録 — 基準点として保存されます</p>
+        <p class="text-sm mt-1" style="color:var(--muted)">次回給油時から実燃費・走行距離が自動計算されます。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input card -->
+  <div class="card mb-3">
+    <!-- header row with toggles -->
+    <div class="flex items-center justify-between px-4 pt-3 pb-2">
+      <div class="section-ttl">給油データ入力</div>
+      <label class="sw-wrap text-xs" style="color:var(--muted);gap:6px">
+        <span class="sw"><input type="checkbox" id="chkFull" checked /><span class="sw-track"></span></span>
+        満タン
+      </label>
+    </div>
+
+    <!-- Date row -->
+    <div class="input-row" id="rowDate" onclick="openDatePicker()">
+      <div>
+        <div class="row-label">給油日</div>
+        <div class="row-value filled" id="dispDate">--</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <span class="row-unit"></span>
+        <span class="row-arrow">›</span>
+      </div>
+    </div>
+
+    <!-- Odo row -->
+    <div class="input-row" id="rowOdo" onclick="openNp('odo')">
+      <div>
+        <div class="row-label">Odoメーター</div>
+        <div class="row-value" id="dispOdo">未入力</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <span class="row-unit">km</span>
+        <span class="row-arrow">›</span>
+      </div>
+    </div>
+
+    <!-- Liter row -->
+    <div class="input-row" id="rowLiter" onclick="openNp('liter')">
+      <div>
+        <div class="row-label">給油量</div>
+        <div class="row-value" id="dispLiter">未入力</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <span class="row-unit">L</span>
+        <span class="row-arrow">›</span>
+      </div>
+    </div>
+
+    <!-- Amount / unit price row with mode toggle -->
+    <div class="input-row" id="rowAmount" onclick="openNp('amount')">
+      <div>
+        <div class="row-label" id="amountLabel">合計金額</div>
+        <div class="row-value" id="dispAmount">未入力</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="mode-chip" onclick="event.stopPropagation()">
+          <button class="mode-opt on" id="modeTotal" onclick="setAmountMode('total')">金額</button>
+          <button class="mode-opt"    id="modeUnit"  onclick="setAmountMode('unit')">単価</button>
+        </div>
+        <span class="row-arrow">›</span>
+      </div>
+    </div>
+
+    <div class="px-4 py-3">
+      <button class="btn-main" id="btnSave" onclick="addRecord()">記録する</button>
+    </div>
+  </div>
+
+  <!-- Live preview -->
+  <div id="preview" class="preview-card mb-4" style="display:none">
+    <div class="section-ttl mb-3" style="border-color:var(--blue)">リアルタイムプレビュー</div>
+    <div class="space-y-2">
+      <div class="preview-item">
+        <span class="preview-label">走行距離（前回差分）</span>
+        <span class="preview-val" id="prevTrip">-- km</span>
+      </div>
+      <div class="preview-item">
+        <span class="preview-label">推定燃費</span>
+        <span class="preview-val" id="prevFuel">-- km/L</span>
+      </div>
+      <div class="preview-item">
+        <span class="preview-label">ガソリン単価</span>
+        <span class="preview-val" id="prevPrice">-- 円/L</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden date input -->
+  <input type="date" id="hiddenDate" style="position:absolute;opacity:0;pointer-events:none;top:0" />
+
+  <!-- Error -->
+  <div id="errMsg" style="color:var(--red);font-size:.85rem;text-align:center;display:none;margin-bottom:12px"></div>
+
+  <!-- History -->
+  <div class="section-ttl mb-3">給油履歴</div>
+  <div id="histList">
+    <p class="text-center text-sm py-8" style="color:var(--muted)">まだ記録がありません</p>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: GRAPH
+══════════════════════════════════════ -->
+<div id="pgGraph" class="page">
+<div class="max-w-md mx-auto px-4 py-5">
+  <div class="mb-5">
+    <h2 class="text-xl font-bold">📊 グラフ・統計</h2>
+    <p class="text-xs mt-0.5" style="color:var(--muted)">ANALYSIS</p>
+  </div>
+
+  <!-- Chart type toggle -->
+  <div class="chart-tab-wrap mb-1" id="chartTabWrap">
+    <button class="chart-tab on" id="ctFuel" onclick="switchChart('fuel')">燃費推移</button>
+    <button class="chart-tab"    id="ctPrice" onclick="switchChart('price')">単価推移</button>
+  </div>
+
+  <div class="card p-4 mb-4">
+    <canvas id="gCanvas" height="200"></canvas>
+    <p id="gEmpty" class="text-center text-sm py-6" style="color:var(--muted);display:none">データが2件以上あるとグラフが表示されます</p>
+  </div>
+
+  <!-- Stats summary -->
+  <div id="statsCard" class="card p-4 mb-4" style="display:none">
+    <div class="section-ttl mb-3">累計統計</div>
+    <div class="grid grid-cols-2 gap-3">
+      <div style="background:var(--input);border-radius:12px;padding:12px;text-align:center">
+        <div class="stat-lbl mb-1">平均燃費</div>
+        <div class="text-2xl font-bold blue-glow" id="sAvgFuel">--</div>
+        <div class="stat-unit">km/L</div>
+      </div>
+      <div style="background:var(--input);border-radius:12px;padding:12px;text-align:center">
+        <div class="stat-lbl mb-1">平均単価</div>
+        <div class="text-2xl font-bold amber-glow" id="sAvgPrice">--</div>
         <div class="stat-unit">円/L</div>
       </div>
-    </div>
-    <!-- タンク残量バー -->
-    <div id="tankBarWrap" style="display:none" class="mt-4">
-      <div class="flex justify-between text-xs mb-1" style="color:var(--text-muted)">
-        <span>タンク使用率</span>
-        <span id="tankPct"></span>
+      <div style="background:var(--input);border-radius:12px;padding:12px;text-align:center">
+        <div class="stat-lbl mb-1">総走行距離</div>
+        <div class="text-2xl font-bold green-glow" id="sTotalKm">--</div>
+        <div class="stat-unit">km</div>
       </div>
-      <div class="tank-bar-wrap"><div class="tank-bar" id="tankBar" style="width:0%"></div></div>
-    </div>
-  </div>
-
-  <!-- 初回アナウンス -->
-  <div id="firstNotice" class="notice-box mb-5" style="display:none">
-    <div class="flex items-start gap-3">
-      <span class="text-xl">📍</span>
-      <div>
-        <p class="font-semibold text-sm" style="color:var(--amber)">初回登録について</p>
-        <p class="text-sm mt-1" style="color:var(--text-muted)">この給油データが基準点になります。次回給油時に実燃費・走行距離が自動計算されます。</p>
+      <div style="background:var(--input);border-radius:12px;padding:12px;text-align:center">
+        <div class="stat-lbl mb-1">総給油コスト</div>
+        <div class="text-2xl font-bold" id="sTotalCost">--</div>
+        <div class="stat-unit">円</div>
+      </div>
+      <div style="background:var(--input);border-radius:12px;padding:12px;text-align:center;grid-column:span 2">
+        <div class="stat-lbl mb-1">平均コスト効率</div>
+        <div class="text-2xl font-bold" style="color:var(--green)" id="sAvgCostKm">--</div>
+        <div class="stat-unit">円/km</div>
       </div>
     </div>
   </div>
-
-  <!-- 入力フォーム -->
-  <div class="card p-5 mb-5">
-    <div class="section-title mb-4">給油データ入力</div>
-    <div class="space-y-4">
-      <div>
-        <label>給油日</label>
-        <input type="date" id="inputDate" />
-      </div>
-      <div>
-        <label>総走行距離（Odoメーター）</label>
-        <input type="number" id="inputOdo" placeholder="例：15420" inputmode="decimal" />
-      </div>
-      <div class="flex gap-3">
-        <div class="flex-1">
-          <label>給油量 (L)</label>
-          <input type="number" id="inputLiter" placeholder="例：35.5" inputmode="decimal" step="0.01" />
-        </div>
-        <div class="flex-1">
-          <label>合計金額 (円)</label>
-          <input type="number" id="inputAmount" placeholder="例：5800" inputmode="numeric" />
-        </div>
-      </div>
-      <!-- 満タンフラグ -->
-      <label class="toggle-wrap" style="text-transform:none;font-size:0.9rem;color:var(--text-primary);margin-bottom:0">
-        <span class="toggle">
-          <input type="checkbox" id="inputFullTank" checked />
-          <span class="toggle-slider"></span>
-        </span>
-        満タン給油
-        <span class="text-xs ml-1" style="color:var(--text-muted)">(OFFで部分給油)</span>
-      </label>
-      <button class="btn-primary" onclick="addRecord()">記録する</button>
-    </div>
-  </div>
-
-  <!-- エラー表示 -->
-  <div id="errorMsg" class="text-sm text-center mb-4" style="color:var(--danger);display:none"></div>
-
-  <!-- 履歴 -->
-  <div>
-    <div class="section-title mb-3">給油履歴</div>
-    <div id="historyList" class="space-y-3">
-      <p class="text-center text-sm py-8" style="color:var(--text-muted)">まだ記録がありません</p>
-    </div>
-  </div>
-
 </div>
 </div>
 
-<!-- ═══════════════ GRAPH ═══════════════ -->
-<div id="pageGraph" class="page">
-<div class="max-w-md mx-auto px-4 py-6">
-
-  <div class="mb-6">
-    <h2 class="text-xl font-bold tracking-tight">📊 燃費グラフ</h2>
-    <p class="text-xs mt-0.5" style="color:var(--text-muted)">FUEL EFFICIENCY TREND</p>
+<!-- ══════════════════════════════════════
+     PAGE: SETTINGS
+══════════════════════════════════════ -->
+<div id="pgSettings" class="page">
+<div class="max-w-md mx-auto px-4 py-5">
+  <div class="mb-5">
+    <h2 class="text-xl font-bold">⚙️ 設定</h2>
+    <p class="text-xs mt-0.5" style="color:var(--muted)">SETTINGS</p>
   </div>
 
-  <div class="card p-4 mb-5">
-    <div class="section-title mb-4">実燃費の推移 (km/L)</div>
-    <canvas id="graphCanvas" height="200"></canvas>
-    <p id="graphEmpty" class="text-center text-sm py-6" style="color:var(--text-muted);display:none">データが2件以上あるとグラフが表示されます</p>
-  </div>
-
-  <!-- 統計サマリー -->
-  <div class="card p-5 mb-5" id="statsSummary" style="display:none">
-    <div class="section-title mb-4">累計統計</div>
-    <div class="grid grid-cols-2 gap-3">
-      <div class="history-card text-center">
-        <div class="stat-label mb-1">平均燃費</div>
-        <div class="text-2xl font-bold" style="color:var(--blue)" id="avgFuel">--</div>
-        <div class="text-xs" style="color:var(--text-muted)">km/L</div>
+  <!-- Car settings -->
+  <div class="card mb-4">
+    <div class="p-4 pb-2"><div class="section-ttl">車両情報</div></div>
+    <div class="set-row">
+      <span class="text-sm" style="color:var(--muted)">愛車名</span>
+      <input class="set-input" type="text" id="sCarName" placeholder="例：ヤリス" />
+    </div>
+    <div class="set-row">
+      <div>
+        <span class="text-sm" style="color:var(--muted)">タンク容量 (L)</span>
+        <p class="text-xs" style="color:var(--muted);margin-top:2px">航続距離の目安に使用</p>
       </div>
-      <div class="history-card text-center">
-        <div class="stat-label mb-1">平均単価</div>
-        <div class="text-2xl font-bold" style="color:var(--amber)" id="avgPrice">--</div>
-        <div class="text-xs" style="color:var(--text-muted)">円/L</div>
-      </div>
-      <div class="history-card text-center">
-        <div class="stat-label mb-1">総走行距離</div>
-        <div class="text-2xl font-bold" style="color:var(--green)" id="totalKm">--</div>
-        <div class="text-xs" style="color:var(--text-muted)">km</div>
-      </div>
-      <div class="history-card text-center">
-        <div class="stat-label mb-1">総給油コスト</div>
-        <div class="text-2xl font-bold" style="color:var(--text-primary)" id="totalCost">--</div>
-        <div class="text-xs" style="color:var(--text-muted)">円</div>
-      </div>
+      <input class="set-input" type="number" id="sTankSize" placeholder="例：50" inputmode="decimal" />
+    </div>
+    <div class="p-4 pt-2">
+      <button class="btn-main" onclick="saveSettings()">保存する</button>
+      <div id="setSaved" class="text-center text-sm mt-2" style="color:var(--green);display:none">✓ 保存しました</div>
     </div>
   </div>
 
-</div>
-</div>
-
-<!-- ═══════════════ SETTINGS ═══════════════ -->
-<div id="pageSettings" class="page">
-<div class="max-w-md mx-auto px-4 py-6">
-
-  <div class="mb-6">
-    <h2 class="text-xl font-bold tracking-tight">⚙️ 設定</h2>
-    <p class="text-xs mt-0.5" style="color:var(--text-muted)">SETTINGS</p>
-  </div>
-
-  <!-- 車両設定 -->
-  <div class="card mb-5">
-    <div class="p-4 pb-2"><div class="section-title">車両情報</div></div>
-    <div class="p-4 pt-2 space-y-4">
-      <div>
-        <label>車種・愛車名</label>
-        <input type="text" id="setCarName" placeholder="例：ヤリス、N-BOX" />
-      </div>
-      <div>
-        <label>タンク容量 (L) ※任意</label>
-        <input type="number" id="setTankSize" placeholder="例：50" inputmode="decimal" step="0.1" />
-        <p class="text-xs mt-1" style="color:var(--text-muted)">設定するとタンク使用率バーが表示されます</p>
-      </div>
-      <button class="btn-primary" onclick="saveSettings()">保存する</button>
-      <div id="settingsSaved" class="text-center text-sm" style="color:var(--green);display:none">✓ 保存しました</div>
-    </div>
-  </div>
-
-  <!-- データ管理 -->
-  <div class="card mb-5">
-    <div class="p-4 pb-2"><div class="section-title">データ管理</div></div>
+  <!-- Data management -->
+  <div class="card mb-4">
+    <div class="p-4 pb-2"><div class="section-ttl">データ管理</div></div>
     <div class="p-4 pt-3 space-y-3">
-      <button class="btn-secondary" onclick="exportCSV()">
-        📥 CSVエクスポート
-      </button>
-      <p class="text-xs" style="color:var(--text-muted)">全給油データをCSVファイルとしてダウンロードします</p>
+      <button class="btn-sub" onclick="exportCSV()">📥 CSVエクスポート</button>
+      <p class="text-xs" style="color:var(--muted)">全給油データをCSV形式でダウンロード（Excel対応）</p>
       <div style="border-top:1px solid var(--border);padding-top:12px">
-        <button class="btn-secondary" style="color:var(--danger);border-color:#3a2020" onclick="clearAllData()">
-          🗑️ 全データ削除
-        </button>
+        <button class="btn-sub" style="color:var(--red);border-color:#3a2020" onclick="clearAll()">🗑️ 全データを削除</button>
       </div>
     </div>
   </div>
 
-  <!-- アプリ情報 -->
+  <!-- App info -->
   <div class="card">
-    <div class="setting-row">
-      <span class="text-sm" style="color:var(--text-muted)">バージョン</span>
-      <span class="text-sm font-mono">2.0.0</span>
-    </div>
-    <div class="setting-row">
-      <span class="text-sm" style="color:var(--text-muted)">データ保存場所</span>
-      <span class="text-sm">LocalStorage</span>
-    </div>
-    <div class="setting-row">
-      <span class="text-sm" style="color:var(--text-muted)">オフライン対応</span>
-      <span class="text-sm" style="color:var(--green)">✓ 対応済み</span>
-    </div>
+    <div class="set-row"><span class="text-sm" style="color:var(--muted)">バージョン</span><span class="text-sm font-mono">2.1.0</span></div>
+    <div class="set-row"><span class="text-sm" style="color:var(--muted)">データ保存</span><span class="text-sm">LocalStorage（端末内）</span></div>
+    <div class="set-row"><span class="text-sm" style="color:var(--muted)">オフライン</span><span class="text-sm" style="color:var(--green)">✓ 対応済み</span></div>
   </div>
-
 </div>
 </div>
 
-<!-- ═══════════════ TAB BAR ═══════════════ -->
+<!-- ──────── TAB BAR ──────── -->
 <nav class="tab-bar">
-  <button class="tab-item active" id="tabHome" onclick="switchTab('Home')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-      <polyline points="9 22 9 12 15 12 15 22"/>
-    </svg>
+  <button class="tab-btn on" id="tbHome" onclick="goTab('Home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     ホーム
   </button>
-  <button class="tab-item" id="tabGraph" onclick="switchTab('Graph')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-    </svg>
+  <button class="tab-btn" id="tbGraph" onclick="goTab('Graph')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
     グラフ
   </button>
-  <button class="tab-item" id="tabSettings" onclick="switchTab('Settings')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="3"/>
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-    </svg>
+  <button class="tab-btn" id="tbSettings" onclick="goTab('Settings')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     設定
   </button>
 </nav>
 
 <script>
-// ═══════════════ Storage ═══════════════
-const RECORDS_KEY  = 'fuelTracker_v1';
-const SETTINGS_KEY = 'fuelTracker_settings';
+/* ════════════════════════════════════
+   STORAGE
+════════════════════════════════════ */
+const REC_KEY  = 'fuelTracker_v1';
+const SET_KEY  = 'fuelTracker_settings';
 
-function loadRecords() {
-  try { return JSON.parse(localStorage.getItem(RECORDS_KEY)) || []; }
-  catch { return []; }
-}
-function saveRecords(r) { localStorage.setItem(RECORDS_KEY, JSON.stringify(r)); }
+const loadRecs = () => { try { return JSON.parse(localStorage.getItem(REC_KEY)) || []; } catch { return []; } };
+const saveRecs = r  => localStorage.setItem(REC_KEY, JSON.stringify(r));
+const loadSet  = () => { try { return JSON.parse(localStorage.getItem(SET_KEY)) || {}; } catch { return {}; } };
+const saveSet  = s  => localStorage.setItem(SET_KEY, JSON.stringify(s));
 
-function loadSettings() {
-  try { return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; }
-  catch { return {}; }
-}
-function saveSettingsData(s) { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
+/* ════════════════════════════════════
+   STATE
+════════════════════════════════════ */
+const form = { date: '', odo: '', liter: '', amount: '' };
+let amountMode  = 'total'; // 'total' | 'unit'
+let chartMode   = 'fuel';
+let npField     = null;
+let npStr       = '';
 
-// ═══════════════ Helpers ═══════════════
-function today() {
+/* ════════════════════════════════════
+   DATE HELPERS
+════════════════════════════════════ */
+function todayStr() {
   const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;
 }
-function formatDate(s) {
+function z(n) { return String(n).padStart(2,'0'); }
+function fmtDate(s) {
+  if (!s) return '--';
   const [y,m,d] = s.split('-');
-  return `${y}/${m}/${d}`;
-}
-function showError(msg) {
-  const el = document.getElementById('errorMsg');
-  el.textContent = msg;
-  el.style.display = 'block';
-  setTimeout(() => { el.style.display = 'none'; }, 3000);
+  const day = ['日','月','火','水','木','金','土'][new Date(s).getDay()];
+  return `${y}/${m}/${d}(${day})`;
 }
 
-// ═══════════════ Fuel calculation (non-full tank support) ═══════════════
-//
-// 満タン法：前の「満タン」記録から今回の「満タン」記録までの
-// 走行距離 / その間の総給油量 で実燃費を計算する。
-// 間に部分給油がある場合はそのリッターも合算する。
-//
-function calcFuelEfficiency(records, targetIdx) {
-  const r = records[targetIdx];
-  if (!r.fullTank) return null; // 部分給油は燃費を計算しない
+/* ════════════════════════════════════
+   NUMPAD
+════════════════════════════════════ */
+const FIELD_CFG = {
+  odo:    { label: 'Odoメーター (km)', decimal: false, next: 'liter'  },
+  liter:  { label: '給油量 (L)',       decimal: true,  next: 'amount' },
+  amount: { label: '合計金額 (円)',     decimal: false, next: null     },
+};
 
-  // 直前の満タン給油を探す
-  let prevFullIdx = -1;
-  for (let i = targetIdx - 1; i >= 0; i--) {
-    if (records[i].fullTank) { prevFullIdx = i; break; }
-  }
-  if (prevFullIdx === -1) return null; // 基準点がない
+function openNp(field) {
+  npField = field;
+  npStr   = form[field] || '';
 
-  // 前の満タンから今回までの全ての給油量を合算
-  let totalLiter = 0;
-  for (let i = prevFullIdx + 1; i <= targetIdx; i++) {
-    totalLiter += records[i].liter;
-  }
+  const cfg = FIELD_CFG[field] || FIELD_CFG.amount;
+  const label = field === 'amount'
+    ? (amountMode === 'unit' ? '単価 (円/L)' : '合計金額 (円)')
+    : cfg.label;
 
-  const trip = r.odo - records[prevFullIdx].odo;
-  if (trip <= 0 || totalLiter <= 0) return null;
-  return { fuel: trip / totalLiter, trip };
+  document.getElementById('npLabel').textContent = label;
+  document.getElementById('npDotBtn').style.opacity = cfg.decimal ? '1' : '.25';
+  document.getElementById('npDotBtn').style.pointerEvents = cfg.decimal ? 'auto' : 'none';
+
+  updateNpDisplay();
+
+  // Quick-fill hint for amount field
+  updateNpHint();
+
+  const overlay = document.getElementById('npOverlay');
+  overlay.classList.add('open');
+
+  // Last field confirm button text
+  document.getElementById('npConfirm').textContent =
+    (field === 'amount') ? '完了 ✓' : '次へ →';
 }
 
-// ═══════════════ Add Record ═══════════════
-function addRecord() {
-  const date     = document.getElementById('inputDate').value;
-  const odo      = parseFloat(document.getElementById('inputOdo').value);
-  const liter    = parseFloat(document.getElementById('inputLiter').value);
-  const amount   = parseFloat(document.getElementById('inputAmount').value);
-  const fullTank = document.getElementById('inputFullTank').checked;
-
-  if (!date)                        return showError('給油日を入力してください');
-  if (isNaN(odo))                   return showError('総走行距離を入力してください');
-  if (isNaN(liter) || liter <= 0)   return showError('給油量を入力してください');
-  if (isNaN(amount) || amount <= 0) return showError('合計金額を入力してください');
-
-  const records = loadRecords();
-  if (records.length > 0 && odo <= records[records.length - 1].odo) {
-    return showError(`総走行距離は前回(${records[records.length-1].odo.toLocaleString()}km)より大きい値を入力してください`);
-  }
-
-  records.push({ date, odo, liter, amount, fullTank, id: Date.now() });
-  saveRecords(records);
-
-  document.getElementById('inputOdo').value    = '';
-  document.getElementById('inputLiter').value  = '';
-  document.getElementById('inputAmount').value = '';
-  document.getElementById('inputDate').value   = today();
-  document.getElementById('inputFullTank').checked = true;
-
-  render();
-}
-
-// ═══════════════ Delete ═══════════════
-function deleteRecord(id) {
-  if (!confirm('このデータを削除しますか？')) return;
-  saveRecords(loadRecords().filter(r => r.id !== id));
-  render();
-}
-
-// ═══════════════ Settings ═══════════════
-function saveSettings() {
-  const s = {
-    carName:  document.getElementById('setCarName').value.trim(),
-    tankSize: parseFloat(document.getElementById('setTankSize').value) || 0
-  };
-  saveSettingsData(s);
-  const msg = document.getElementById('settingsSaved');
-  msg.style.display = 'block';
-  setTimeout(() => { msg.style.display = 'none'; }, 2000);
-  render();
-}
-
-function loadSettingsToForm() {
-  const s = loadSettings();
-  document.getElementById('setCarName').value  = s.carName  || '';
-  document.getElementById('setTankSize').value = s.tankSize || '';
-}
-
-// ═══════════════ CSV Export ═══════════════
-function exportCSV() {
-  const records = loadRecords();
-  if (records.length === 0) { alert('エクスポートするデータがありません'); return; }
-
-  const header = ['日付', 'Odo(km)', '給油量(L)', '金額(円)', '単価(円/L)', '走行距離(km)', '実燃費(km/L)', '満タン'];
-  const rows = records.map((r, i) => {
-    const calc   = calcFuelEfficiency(records, i);
-    const price  = Math.round(r.amount / r.liter);
-    return [
-      r.date,
-      r.odo,
-      r.liter,
-      r.amount,
-      price,
-      calc ? calc.trip : '',
-      calc ? calc.fuel.toFixed(2) : '',
-      r.fullTank ? '○' : '△部分給油'
-    ].join(',');
-  });
-
-  const csv  = '﻿' + [header.join(','), ...rows].join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `fuel_log_${today()}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-// ═══════════════ Clear All ═══════════════
-function clearAllData() {
-  if (!confirm('全データを削除します。この操作は取り消せません。\n本当に削除しますか？')) return;
-  localStorage.removeItem(RECORDS_KEY);
-  render();
-}
-
-// ═══════════════ Graph ═══════════════
-function drawGraph() {
-  const records = loadRecords();
-  const canvas  = document.getElementById('graphCanvas');
-  const empty   = document.getElementById('graphEmpty');
-
-  // 燃費が計算できるデータ点のみ
-  const points = records
-    .map((r, i) => {
-      const c = calcFuelEfficiency(records, i);
-      return c ? { date: r.date, fuel: parseFloat(c.fuel.toFixed(2)) } : null;
-    })
-    .filter(Boolean);
-
-  if (points.length < 1) {
-    canvas.style.display = 'none';
-    empty.style.display  = 'block';
-    return;
-  }
-
-  canvas.style.display = 'block';
-  empty.style.display  = 'none';
-
-  const dpr  = window.devicePixelRatio || 1;
-  const W    = canvas.parentElement.clientWidth - 32;
-  const H    = 200;
-  canvas.width  = W * dpr;
-  canvas.height = H * dpr;
-  canvas.style.width  = W + 'px';
-  canvas.style.height = H + 'px';
-
-  const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
-
-  const pad = { top: 20, right: 20, bottom: 36, left: 44 };
-  const gW  = W - pad.left - pad.right;
-  const gH  = H - pad.top  - pad.bottom;
-
-  // colors
-  const blue  = '#3b82f6';
-  const amber = '#f59e0b';
-  const grid  = '#2a3044';
-  const muted = '#6b7280';
-
-  // scale
-  const fuels  = points.map(p => p.fuel);
-  const minF   = Math.max(0, Math.min(...fuels) - 1);
-  const maxF   = Math.max(...fuels) + 1;
-  const scaleX = i => pad.left + (i / (points.length - 1 || 1)) * gW;
-  const scaleY = v => pad.top  + gH - ((v - minF) / (maxF - minF)) * gH;
-
-  // grid lines
-  ctx.strokeStyle = grid;
-  ctx.lineWidth   = 1;
-  for (let i = 0; i <= 4; i++) {
-    const y = pad.top + (gH / 4) * i;
-    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + gW, y); ctx.stroke();
-    const val = (maxF - ((maxF - minF) / 4) * i).toFixed(1);
-    ctx.fillStyle  = muted;
-    ctx.font       = `${10 * dpr / dpr}px sans-serif`;
-    ctx.textAlign  = 'right';
-    ctx.fillText(val, pad.left - 6, y + 4);
-  }
-
-  if (points.length === 1) {
-    // 1点だけの場合はドットのみ
-    const x = scaleX(0), y = scaleY(points[0].fuel);
-    ctx.beginPath();
-    ctx.arc(x, y, 5, 0, Math.PI * 2);
-    ctx.fillStyle = blue;
-    ctx.fill();
-    return;
-  }
-
-  // gradient fill
-  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + gH);
-  grad.addColorStop(0,   'rgba(59,130,246,0.3)');
-  grad.addColorStop(1,   'rgba(59,130,246,0)');
-  ctx.beginPath();
-  ctx.moveTo(scaleX(0), pad.top + gH);
-  points.forEach((p, i) => ctx.lineTo(scaleX(i), scaleY(p.fuel)));
-  ctx.lineTo(scaleX(points.length - 1), pad.top + gH);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  // line
-  ctx.beginPath();
-  ctx.strokeStyle = blue;
-  ctx.lineWidth   = 2.5;
-  ctx.lineJoin    = 'round';
-  points.forEach((p, i) => i === 0 ? ctx.moveTo(scaleX(i), scaleY(p.fuel)) : ctx.lineTo(scaleX(i), scaleY(p.fuel)));
-  ctx.stroke();
-
-  // dots + labels
-  points.forEach((p, i) => {
-    const x = scaleX(i), y = scaleY(p.fuel);
-    ctx.beginPath();
-    ctx.arc(x, y, 4, 0, Math.PI * 2);
-    ctx.fillStyle   = '#11141a';
-    ctx.fill();
-    ctx.strokeStyle = blue;
-    ctx.lineWidth   = 2;
-    ctx.stroke();
-
-    ctx.fillStyle  = '#e8eaf0';
-    ctx.font       = `bold ${10}px sans-serif`;
-    ctx.textAlign  = 'center';
-    ctx.fillText(p.fuel.toFixed(1), x, y - 10);
-
-    // x axis label (short date)
-    const label = p.date.slice(5).replace('-', '/');
-    ctx.fillStyle = muted;
-    ctx.font      = `${9}px sans-serif`;
-    ctx.fillText(label, x, H - pad.bottom + 16);
-  });
-}
-
-// ═══════════════ Stats Summary ═══════════════
-function renderStats() {
-  const records = loadRecords();
-  const summary = document.getElementById('statsSummary');
-  if (records.length < 2) { summary.style.display = 'none'; return; }
-  summary.style.display = 'block';
-
-  const fuelPoints = records
-    .map((r, i) => calcFuelEfficiency(records, i))
-    .filter(Boolean);
-
-  const avgFuel  = fuelPoints.length ? (fuelPoints.reduce((s,p) => s + p.fuel, 0) / fuelPoints.length).toFixed(1) : '--';
-  const avgPrice = Math.round(records.reduce((s,r) => s + r.amount / r.liter, 0) / records.length);
-  const firstRec = records[0], lastRec = records[records.length-1];
-  const totalKm  = lastRec.odo - firstRec.odo;
-  const totalCost = records.slice(1).reduce((s,r) => s + r.amount, 0);
-
-  document.getElementById('avgFuel').textContent  = avgFuel;
-  document.getElementById('avgPrice').textContent = avgPrice.toLocaleString();
-  document.getElementById('totalKm').textContent  = totalKm.toLocaleString();
-  document.getElementById('totalCost').textContent = '¥' + totalCost.toLocaleString();
-}
-
-// ═══════════════ Render Home ═══════════════
-function render() {
-  const records  = loadRecords();
-  const settings = loadSettings();
-
-  // header car name
-  const headerCar = document.getElementById('headerCarName');
-  headerCar.textContent = settings.carName ? settings.carName.toUpperCase() : 'MY FUEL LOG';
-
-  document.getElementById('totalCount').textContent = records.length;
-
-  const dashboard   = document.getElementById('dashboard');
-  const firstNotice = document.getElementById('firstNotice');
-
-  // find latest fuel efficiency result
-  let latestCalc = null;
-  for (let i = records.length - 1; i >= 0; i--) {
-    const c = calcFuelEfficiency(records, i);
-    if (c) { latestCalc = { ...c, record: records[i] }; break; }
-  }
-
-  if (records.length === 0) {
-    dashboard.style.display   = 'none';
-    firstNotice.style.display = 'none';
-  } else if (!latestCalc) {
-    dashboard.style.display   = 'none';
-    firstNotice.style.display = 'block';
-  } else {
-    firstNotice.style.display = 'none';
-    dashboard.style.display   = 'block';
-    const r     = latestCalc.record;
-    const price = Math.round(r.amount / r.liter);
-    document.getElementById('dashFuel').textContent  = latestCalc.fuel.toFixed(1);
-    document.getElementById('dashTrip').textContent  = latestCalc.trip.toLocaleString();
-    document.getElementById('dashPrice').textContent = price.toLocaleString();
-
-    // tank bar
-    const tankWrap = document.getElementById('tankBarWrap');
-    if (settings.tankSize > 0) {
-      const pct = Math.min(100, Math.round((latestCalc.record.liter / settings.tankSize) * 100));
-      tankWrap.style.display = 'block';
-      document.getElementById('tankBar').style.width = pct + '%';
-      document.getElementById('tankPct').textContent = `${pct}%（${latestCalc.record.liter}L / ${settings.tankSize}L）`;
+function updateNpHint() {
+  const hint = document.getElementById('npHint');
+  if (npField === 'odo') {
+    const recs = loadRecs();
+    if (recs.length > 0) {
+      const last = recs[recs.length - 1];
+      hint.innerHTML = `前回 <b>${last.odo.toLocaleString()} km</b>`;
     } else {
-      tankWrap.style.display = 'none';
+      hint.innerHTML = '';
+    }
+    return;
+  }
+  if (npField === 'amount') {
+    const recs = loadRecs();
+    if (recs.length > 0) {
+      const last = recs[recs.length - 1];
+      const lastPrice = Math.round(last.amount / last.liter);
+      if (amountMode === 'unit') {
+        hint.innerHTML = `<span class="np-quickfill" ontouchend="npQuickFill(event,${lastPrice})" onclick="npQuickFill(event,${lastPrice})">前回と同じ ${lastPrice}円/L</span>`;
+      } else {
+        hint.innerHTML = `前回単価 <b>${lastPrice}円/L</b>`;
+      }
+    } else {
+      hint.innerHTML = '';
+    }
+    return;
+  }
+  // liter: preview fuel if odo is filled
+  if (npField === 'liter') {
+    updateLivePreview();
+    return;
+  }
+  hint.innerHTML = '';
+}
+
+function npQuickFill(e, val) {
+  e.preventDefault(); e.stopPropagation();
+  npStr = String(val);
+  updateNpDisplay();
+}
+
+function updateNpDisplay() {
+  const el = document.getElementById('npVal');
+  if (!npStr) {
+    el.textContent = '0';
+    el.classList.add('placeholder');
+  } else {
+    const num = parseFloat(npStr);
+    if (!isNaN(num) && npField !== 'liter') {
+      el.textContent = Number.isInteger(num) ? num.toLocaleString() : npStr;
+    } else {
+      el.textContent = npStr;
+    }
+    el.classList.remove('placeholder');
+  }
+  // Live preview update
+  updateLivePreview();
+}
+
+function npKey(e, k) {
+  e.preventDefault();
+  if (k === '⌫') {
+    npStr = npStr.slice(0, -1);
+  } else if (k === '.') {
+    if (!npStr.includes('.')) npStr += (npStr ? '' : '0') + '.';
+  } else {
+    if (npStr === '0') npStr = k;
+    else npStr += k;
+    // Limit digits
+    const parts = npStr.split('.');
+    if (parts[0].length > 6) { npStr = npStr.slice(0,-1); return; }
+    if (parts[1] && parts[1].length > 2) { npStr = npStr.slice(0,-1); return; }
+  }
+  updateNpDisplay();
+  updateNpHint();
+}
+
+function npConfirm(e) {
+  e.preventDefault();
+  if (!npStr) { closeNp(); return; }
+  const v = parseFloat(npStr);
+  if (isNaN(v) || v <= 0) { closeNp(); return; }
+
+  form[npField] = npStr;
+  updateDispRow(npField, v);
+  closeNp();
+
+  // Auto-advance
+  const next = FIELD_CFG[npField]?.next;
+  if (next) setTimeout(() => openNp(next), 120);
+}
+
+function closeNp() {
+  document.getElementById('npOverlay').classList.remove('open');
+  npField = null;
+  updateLivePreview();
+}
+
+function npBgClose(e) {
+  if (e.target === document.getElementById('npOverlay')) closeNp();
+}
+
+/* ════════════════════════════════════
+   DATE PICKER
+════════════════════════════════════ */
+function openDatePicker() {
+  const inp = document.getElementById('hiddenDate');
+  inp.value = form.date || todayStr();
+  inp.onchange = () => {
+    form.date = inp.value;
+    document.getElementById('dispDate').textContent = fmtDate(form.date);
+  };
+  inp.click();
+}
+
+/* ════════════════════════════════════
+   DISPLAY ROW UPDATE
+════════════════════════════════════ */
+function updateDispRow(field, v) {
+  const el = document.getElementById('disp' + field.charAt(0).toUpperCase() + field.slice(1));
+  if (!el) return;
+  let txt = '';
+  if (field === 'odo')    txt = v.toLocaleString();
+  if (field === 'liter')  txt = v;
+  if (field === 'amount') {
+    if (amountMode === 'unit') {
+      const liter = parseFloat(form.liter);
+      txt = isNaN(liter) ? v.toLocaleString() : Math.round(v * liter).toLocaleString();
+      form.amount = isNaN(liter) ? npStr : String(Math.round(v * liter));
+    } else {
+      txt = v.toLocaleString();
+    }
+  }
+  el.textContent = txt;
+  el.classList.add('... filled');
+  // Re-set color to filled
+  el.style.color = 'var(--txt)';
+}
+
+/* ════════════════════════════════════
+   AMOUNT MODE
+════════════════════════════════════ */
+function setAmountMode(mode) {
+  amountMode = mode;
+  document.getElementById('modeTotal').classList.toggle('on', mode === 'total');
+  document.getElementById('modeUnit').classList.toggle('on', mode === 'unit');
+  document.getElementById('amountLabel').textContent = mode === 'unit' ? '単価 (円/L)' : '合計金額';
+  form.amount = '';
+  document.getElementById('dispAmount').textContent = '未入力';
+  document.getElementById('dispAmount').style.color = '';
+}
+
+/* ════════════════════════════════════
+   LIVE PREVIEW
+════════════════════════════════════ */
+function updateLivePreview() {
+  const recs  = loadRecs();
+  const odo   = parseFloat(form.odo   || (npField === 'odo'   ? npStr : ''));
+  const liter = parseFloat(form.liter || (npField === 'liter' ? npStr : ''));
+  let amount  = parseFloat(form.amount);
+  if (amountMode === 'unit' && npField === 'amount') {
+    amount = parseFloat(npStr) * liter;
+  }
+
+  const prev = document.getElementById('preview');
+  const hasOdo   = !isNaN(odo)   && odo > 0;
+  const hasLiter = !isNaN(liter) && liter > 0;
+
+  if (!hasOdo && !hasLiter) { prev.style.display = 'none'; return; }
+  prev.style.display = 'block';
+
+  let tripTxt = '-- km', fuelTxt = '-- km/L', priceTxt = '-- 円/L';
+
+  if (hasOdo && recs.length > 0) {
+    const lastOdo = recs[recs.length - 1].odo;
+    const trip = odo - lastOdo;
+    tripTxt = trip > 0 ? `${trip.toLocaleString()} km` : '-- km（前回以下）';
+    if (hasLiter && trip > 0) {
+      fuelTxt = (trip / liter).toFixed(1) + ' km/L';
+    }
+  }
+  if (hasLiter && !isNaN(amount) && amount > 0) {
+    priceTxt = Math.round(amount / liter).toLocaleString() + ' 円/L';
+  }
+
+  document.getElementById('prevTrip').textContent  = tripTxt;
+  document.getElementById('prevFuel').textContent  = fuelTxt;
+  document.getElementById('prevPrice').textContent = priceTxt;
+
+  // Also update numpad hint if liter field is open
+  if (npField === 'liter') {
+    const recs2 = loadRecs();
+    if (recs2.length > 0 && hasOdo && hasLiter) {
+      const trip = odo - recs2[recs2.length-1].odo;
+      if (trip > 0) {
+        document.getElementById('npHint').innerHTML =
+          `推定 <b style="color:var(--blue)">${(trip/liter).toFixed(1)} km/L</b>`;
+      }
+    }
+  }
+}
+
+/* ════════════════════════════════════
+   FUEL CALCULATION (non-full tank)
+════════════════════════════════════ */
+function calcEff(recs, idx) {
+  const r = recs[idx];
+  if (!r.fullTank) return null;
+  let prevFull = -1;
+  for (let i = idx-1; i >= 0; i--) { if (recs[i].fullTank) { prevFull = i; break; } }
+  if (prevFull === -1) return null;
+  let totalL = 0;
+  for (let i = prevFull+1; i <= idx; i++) totalL += recs[i].liter;
+  const trip = r.odo - recs[prevFull].odo;
+  if (trip <= 0 || totalL <= 0) return null;
+  return { fuel: trip / totalL, trip };
+}
+
+/* ════════════════════════════════════
+   ADD RECORD
+════════════════════════════════════ */
+function addRecord() {
+  const date     = form.date   || todayStr();
+  const odo      = parseFloat(form.odo);
+  const liter    = parseFloat(form.liter);
+  const amount   = parseFloat(form.amount);
+  const fullTank = document.getElementById('chkFull').checked;
+
+  if (isNaN(odo))            return showErr('Odoメーターを入力してください');
+  if (isNaN(liter)||liter<=0) return showErr('給油量を入力してください');
+  if (isNaN(amount)||amount<=0) return showErr('金額を入力してください');
+
+  const recs = loadRecs();
+  if (recs.length > 0 && odo <= recs[recs.length-1].odo)
+    return showErr(`Odoは前回(${recs[recs.length-1].odo.toLocaleString()}km)より大きい値を入力してください`);
+
+  recs.push({ date, odo, liter, amount, fullTank, id: Date.now() });
+  saveRecs(recs);
+
+  // Reset form
+  form.odo = form.liter = form.amount = '';
+  form.date = todayStr();
+  ['dispOdo','dispLiter','dispAmount'].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent = '未入力';
+    el.style.color = '';
+  });
+  document.getElementById('dispDate').textContent = fmtDate(todayStr());
+  document.getElementById('chkFull').checked = true;
+  document.getElementById('preview').style.display = 'none';
+
+  showToast();
+  render();
+}
+
+function showErr(msg) {
+  const el = document.getElementById('errMsg');
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 3000);
+}
+
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ════════════════════════════════════
+   DELETE
+════════════════════════════════════ */
+function delRec(id) {
+  if (!confirm('このデータを削除しますか？')) return;
+  saveRecs(loadRecs().filter(r => r.id !== id));
+  render();
+}
+
+/* ════════════════════════════════════
+   SETTINGS
+════════════════════════════════════ */
+function saveSettings() {
+  saveSet({
+    carName:  document.getElementById('sCarName').value.trim(),
+    tankSize: parseFloat(document.getElementById('sTankSize').value) || 0
+  });
+  const msg = document.getElementById('setSaved');
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 2000);
+  render();
+}
+
+function loadSetForm() {
+  const s = loadSet();
+  document.getElementById('sCarName').value  = s.carName  || '';
+  document.getElementById('sTankSize').value = s.tankSize || '';
+}
+
+/* ════════════════════════════════════
+   CSV EXPORT
+════════════════════════════════════ */
+function exportCSV() {
+  const recs = loadRecs();
+  if (!recs.length) { alert('データがありません'); return; }
+  const hdr = ['日付','Odo(km)','給油量(L)','金額(円)','単価(円/L)','走行距離(km)','実燃費(km/L)','満タン'];
+  const rows = recs.map((r,i) => {
+    const c = calcEff(recs, i);
+    return [r.date, r.odo, r.liter, r.amount, Math.round(r.amount/r.liter),
+            c ? c.trip : '', c ? c.fuel.toFixed(2) : '', r.fullTank ? '○' : '△'].join(',');
+  });
+  const csv  = '﻿' + [hdr.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `fuel_${todayStr()}.csv` });
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+/* ════════════════════════════════════
+   CLEAR ALL
+════════════════════════════════════ */
+function clearAll() {
+  if (!confirm('全データを削除します。この操作は取り消せません。\n削除しますか？')) return;
+  localStorage.removeItem(REC_KEY);
+  render();
+}
+
+/* ════════════════════════════════════
+   RENDER HOME
+════════════════════════════════════ */
+function render() {
+  const recs = loadRecs();
+  const s    = loadSet();
+
+  document.getElementById('hdrCount').textContent = recs.length;
+  document.getElementById('hdrCar').textContent   = s.carName ? s.carName.toUpperCase() : 'MY FUEL LOG';
+
+  // Dashboard
+  const dash     = document.getElementById('dash');
+  const firstNot = document.getElementById('firstNotice');
+
+  let latestCalc = null;
+  for (let i = recs.length-1; i >= 0; i--) {
+    const c = calcEff(recs, i);
+    if (c) { latestCalc = { ...c, rec: recs[i] }; break; }
+  }
+
+  if (!recs.length) {
+    dash.style.display = firstNot.style.display = 'none';
+  } else if (!latestCalc) {
+    dash.style.display = 'none'; firstNot.style.display = 'block';
+  } else {
+    firstNot.style.display = 'none'; dash.style.display = 'block';
+    const r     = latestCalc.rec;
+    const price = Math.round(r.amount / r.liter);
+    const costKm = (r.amount / latestCalc.trip).toFixed(1);
+    document.getElementById('dFuel').textContent   = latestCalc.fuel.toFixed(1);
+    document.getElementById('dTrip').textContent   = latestCalc.trip.toLocaleString();
+    document.getElementById('dPrice').textContent  = price.toLocaleString();
+    document.getElementById('dCostKm').textContent = costKm;
+    document.getElementById('dAmount').textContent = r.amount.toLocaleString();
+
+    // Range estimate
+    const rw = document.getElementById('rangeWrap');
+    if (s.tankSize > 0) {
+      const effPoints = recs.map((r2,i) => calcEff(recs,i)).filter(Boolean);
+      const avgFuel = effPoints.reduce((a,b) => a+b.fuel, 0) / effPoints.length;
+      const range = Math.round(avgFuel * s.tankSize);
+      document.getElementById('rangeVal').textContent = `約 ${range.toLocaleString()} km`;
+      rw.style.display = 'block';
+    } else {
+      rw.style.display = 'none';
     }
   }
 
-  // history
-  const container = document.getElementById('historyList');
-  if (records.length === 0) {
-    container.innerHTML = '<p class="text-center text-sm py-8" style="color:var(--text-muted)">まだ記録がありません</p>';
+  // History (monthly grouped)
+  const container = document.getElementById('histList');
+  if (!recs.length) {
+    container.innerHTML = '<p class="text-center text-sm py-8" style="color:var(--muted)">まだ記録がありません</p>';
     return;
   }
 
-  const reversed = [...records].reverse();
-  container.innerHTML = reversed.map((r, ri) => {
-    const idx   = records.indexOf(r);
-    const isFirst = idx === 0;
-    const calc  = calcFuelEfficiency(records, idx);
-    const price = Math.round(r.amount / r.liter);
+  const reversed = [...recs].reverse();
+  let html = '';
+  let currentMonth = '';
 
-    return `
-    <div class="history-card">
-      <div class="flex justify-between items-start mb-2">
+  reversed.forEach((r, ri) => {
+    const idx   = recs.indexOf(r);
+    const month = r.date.slice(0,7); // YYYY-MM
+    const [my, mm] = month.split('-');
+
+    // Month header with monthly total
+    if (month !== currentMonth) {
+      currentMonth = month;
+      const monthRecs = recs.filter(x => x.date.startsWith(month));
+      const monthTotal = monthRecs.reduce((s, x) => s + x.amount, 0);
+      const monthL     = monthRecs.reduce((s, x) => s + x.liter,  0);
+      html += `
+      <div class="month-header">
+        <span>${my}年${parseInt(mm)}月</span>
+        <span class="month-total">${monthTotal.toLocaleString()}円 / ${monthL.toFixed(1)}L</span>
+      </div>`;
+    }
+
+    const isFirst = idx === 0;
+    const calc    = calcEff(recs, idx);
+    const price   = Math.round(r.amount / r.liter);
+
+    html += `
+    <div class="hist-card mb-2">
+      <div class="flex justify-between items-center mb-2">
         <div class="flex items-center gap-1.5 flex-wrap">
-          <span class="text-sm font-semibold">${formatDate(r.date)}</span>
+          <span class="text-sm font-semibold">${fmtDate(r.date)}</span>
           ${isFirst ? '<span class="badge badge-amber">基準点</span>' : ''}
           ${ri === 0 ? '<span class="badge badge-blue">最新</span>' : ''}
           ${!r.fullTank ? '<span class="badge badge-gray">部分給油</span>' : ''}
         </div>
-        <button class="btn-delete" onclick="deleteRecord(${r.id})">削除</button>
+        <button class="btn-del" onclick="delRec(${r.id})">削除</button>
       </div>
       <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
         <div class="flex justify-between">
-          <span style="color:var(--text-muted)">Odo</span>
+          <span style="color:var(--muted)">Odo</span>
           <span class="font-mono font-semibold">${r.odo.toLocaleString()} km</span>
         </div>
         <div class="flex justify-between">
-          <span style="color:var(--text-muted)">単価</span>
+          <span style="color:var(--muted)">単価</span>
           <span class="font-mono font-semibold">${price.toLocaleString()} 円/L</span>
         </div>
         <div class="flex justify-between">
-          <span style="color:var(--text-muted)">給油量</span>
+          <span style="color:var(--muted)">給油量</span>
           <span class="font-mono font-semibold">${r.liter} L</span>
         </div>
         <div class="flex justify-between">
-          <span style="color:var(--text-muted)">金額</span>
+          <span style="color:var(--muted)">金額</span>
           <span class="font-mono font-semibold">${r.amount.toLocaleString()} 円</span>
         </div>
         ${calc ? `
         <div class="flex justify-between col-span-2 pt-1 mt-1 border-t" style="border-color:var(--border)">
-          <span style="color:var(--text-muted)">走行距離</span>
+          <span style="color:var(--muted)">走行距離</span>
           <span class="font-mono font-semibold" style="color:var(--amber)">${calc.trip.toLocaleString()} km</span>
         </div>
         <div class="flex justify-between col-span-2">
-          <span style="color:var(--text-muted)">実燃費</span>
-          <span class="font-mono font-bold" style="color:var(--blue)">${calc.fuel.toFixed(1)} km/L</span>
+          <span style="color:var(--muted)">実燃費 / コスト</span>
+          <span class="font-mono font-bold">
+            <span style="color:var(--blue)">${calc.fuel.toFixed(1)} km/L</span>
+            <span style="color:var(--muted);font-weight:400"> · </span>
+            <span style="color:var(--amber)">${(r.amount/calc.trip).toFixed(1)} 円/km</span>
+          </span>
         </div>
         ` : `
-        <div class="col-span-2 pt-1 mt-1 text-xs border-t" style="border-color:var(--border);color:var(--text-muted)">
-          ${r.fullTank ? '次回満タン給油時に燃費が計算されます' : '部分給油のため燃費は次の満タン時に合算されます'}
+        <div class="col-span-2 pt-1 mt-1 text-xs border-t" style="border-color:var(--border);color:var(--muted)">
+          ${r.fullTank ? '次回給油時に燃費が計算されます' : '部分給油 — 次の満タン時に合算されます'}
         </div>
         `}
       </div>
     </div>`;
-  }).join('');
+  });
+  container.innerHTML = html;
 
-  // update graph and stats if on those pages
+  // Update graph too if visible
   drawGraph();
   renderStats();
 }
 
-// ═══════════════ Tab Navigation ═══════════════
-function switchTab(name) {
+/* ════════════════════════════════════
+   GRAPH
+════════════════════════════════════ */
+function switchChart(mode) {
+  chartMode = mode;
+  document.getElementById('ctFuel').classList.toggle('on',  mode === 'fuel');
+  document.getElementById('ctPrice').classList.toggle('on', mode === 'price');
+  drawGraph();
+}
+
+function drawGraph() {
+  const recs   = loadRecs();
+  const canvas = document.getElementById('gCanvas');
+  const empty  = document.getElementById('gEmpty');
+  if (!canvas) return;
+
+  let points = [];
+  if (chartMode === 'fuel') {
+    points = recs.map((r,i) => {
+      const c = calcEff(recs, i);
+      return c ? { label: r.date.slice(5).replace('-','/'), val: parseFloat(c.fuel.toFixed(2)) } : null;
+    }).filter(Boolean);
+  } else {
+    points = recs.map(r => ({
+      label: r.date.slice(5).replace('-','/'),
+      val:   Math.round(r.amount / r.liter)
+    }));
+  }
+
+  if (points.length < 1) {
+    canvas.style.display = 'none'; empty.style.display = 'block'; return;
+  }
+  canvas.style.display = 'block'; empty.style.display = 'none';
+
+  const dpr = window.devicePixelRatio || 1;
+  const W   = canvas.parentElement.clientWidth - 32;
+  const H   = 200;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const pad = { t: 24, r: 16, b: 38, l: 44 };
+  const gW  = W - pad.l - pad.r;
+  const gH  = H - pad.t - pad.b;
+
+  const BLUE  = '#3b82f6';
+  const AMBER = '#f59e0b';
+  const color = chartMode === 'fuel' ? BLUE : AMBER;
+  const GRID  = '#252a38';
+  const MUTED = '#6b7280';
+
+  const vals = points.map(p => p.val);
+  const minV = Math.max(0, Math.min(...vals) - (chartMode === 'fuel' ? 1 : 5));
+  const maxV = Math.max(...vals) + (chartMode === 'fuel' ? 1 : 5);
+
+  const sx = i => pad.l + (points.length < 2 ? gW/2 : (i / (points.length-1)) * gW);
+  const sy = v => pad.t + gH - ((v - minV) / (maxV - minV || 1)) * gH;
+
+  // Grid
+  ctx.strokeStyle = GRID; ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.t + (gH / 4) * i;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + gW, y); ctx.stroke();
+    const v = maxV - ((maxV - minV) / 4) * i;
+    ctx.fillStyle = MUTED; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(chartMode === 'fuel' ? v.toFixed(1) : Math.round(v), pad.l - 5, y + 4);
+  }
+
+  if (points.length === 1) {
+    ctx.beginPath(); ctx.arc(sx(0), sy(vals[0]), 5, 0, Math.PI*2);
+    ctx.fillStyle = color; ctx.fill(); return;
+  }
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + gH);
+  grad.addColorStop(0, color + '50'); grad.addColorStop(1, color + '00');
+  ctx.beginPath();
+  ctx.moveTo(sx(0), pad.t + gH);
+  points.forEach((p, i) => ctx.lineTo(sx(i), sy(p.val)));
+  ctx.lineTo(sx(points.length-1), pad.t + gH);
+  ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
+
+  // Line
+  ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+  points.forEach((p, i) => i === 0 ? ctx.moveTo(sx(i), sy(p.val)) : ctx.lineTo(sx(i), sy(p.val)));
+  ctx.stroke();
+
+  // Dots + labels
+  points.forEach((p, i) => {
+    const x = sx(i), y = sy(p.val);
+    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI*2);
+    ctx.fillStyle = '#11141a'; ctx.fill();
+    ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+
+    ctx.fillStyle = '#e8eaf0'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(chartMode === 'fuel' ? p.val.toFixed(1) : p.val, x, y - 10);
+    ctx.fillStyle = MUTED; ctx.font = '9px sans-serif';
+    ctx.fillText(p.label, x, H - pad.b + 16);
+  });
+}
+
+/* ════════════════════════════════════
+   STATS
+════════════════════════════════════ */
+function renderStats() {
+  const recs = loadRecs();
+  const sc   = document.getElementById('statsCard');
+  if (recs.length < 2) { sc.style.display = 'none'; return; }
+  sc.style.display = 'block';
+
+  const effPts = recs.map((r,i) => calcEff(recs,i)).filter(Boolean);
+  const avgFuel  = effPts.length ? (effPts.reduce((s,p) => s+p.fuel, 0) / effPts.length).toFixed(1) : '--';
+  const avgPrice = Math.round(recs.reduce((s,r) => s + r.amount/r.liter, 0) / recs.length);
+  const totalKm  = recs[recs.length-1].odo - recs[0].odo;
+  const totalCost = recs.slice(1).reduce((s,r) => s + r.amount, 0);
+  const avgCostKm = totalKm > 0 ? (totalCost / totalKm).toFixed(1) : '--';
+
+  document.getElementById('sAvgFuel').textContent  = avgFuel;
+  document.getElementById('sAvgPrice').textContent = avgPrice.toLocaleString();
+  document.getElementById('sTotalKm').textContent  = totalKm.toLocaleString();
+  document.getElementById('sTotalCost').textContent = '¥' + totalCost.toLocaleString();
+  document.getElementById('sAvgCostKm').textContent = avgCostKm;
+}
+
+/* ════════════════════════════════════
+   TAB NAVIGATION
+════════════════════════════════════ */
+function goTab(name) {
   ['Home','Graph','Settings'].forEach(n => {
-    document.getElementById('page' + n).classList.toggle('active', n === name);
-    document.getElementById('tab'  + n).classList.toggle('active', n === name);
+    document.getElementById('pg' + n).classList.toggle('on', n === name);
+    document.getElementById('tb' + n).classList.toggle('on', n === name);
   });
   if (name === 'Graph')    { drawGraph(); renderStats(); }
-  if (name === 'Settings') { loadSettingsToForm(); }
+  if (name === 'Settings') { loadSetForm(); }
 }
 
-// ═══════════════ Init ═══════════════
-document.getElementById('inputDate').value = today();
-loadSettingsToForm();
+/* ════════════════════════════════════
+   INIT
+════════════════════════════════════ */
+form.date = todayStr();
+document.getElementById('dispDate').textContent = fmtDate(todayStr());
 render();
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
-}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body>
 </html>
